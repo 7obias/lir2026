@@ -336,9 +336,17 @@ body { background: #07080c; overflow-x: hidden }
 
 .performance.performance--past.performance--liked,
 .performance.performance--past.performance--liked:active {
-  border-color: #50535a;
-  border-left-color: #777a82;
-  background: #686b72;
+  border-color: #5a5c62;
+  border-left-color: #77797f;
+  background: #6b6d73;
+  color: #fff;
+  filter: grayscale(100%) brightness(72%);
+}
+
+.performance.performance--past.performance--liked time,
+.performance.performance--past.performance--liked strong,
+.performance.performance--past.performance--liked::after {
+  color: #fff;
 }
 
 .performance.performance--current.performance--liked {
