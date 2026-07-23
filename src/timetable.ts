@@ -29,6 +29,13 @@ export function performanceStatus(performance: Performance, activeTime: Date): P
   return 'future'
 }
 
+export function toggleSetMembership(current: ReadonlySet<string>, value: string): Set<string> {
+  const next = new Set(current)
+  if (next.has(value)) next.delete(value)
+  else next.add(value)
+  return next
+}
+
 export function formatTime(value: string): string {
   return new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/Prague',

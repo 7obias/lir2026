@@ -1,6 +1,6 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
-import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE } from './timetable'
+import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE, toggleSetMembership } from './timetable'
 import { formatPragueDateTime, pragueLocalInputToDate, useActiveTime, type TimeMode } from './useActiveTime'
 import { useTimetableZoom } from './useTimetableZoom'
 
@@ -15,6 +15,7 @@ export default function App() {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const timelineBodyRef = useRef<HTMLDivElement>(null)
   const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
+  const [markedPerformanceIds, setMarkedPerformanceIds] = useState<Set<string>>(() => new Set())
   const { activeTime, timeState, setTimeState, activateLive } = useActiveTime()
   const [draftMode, setDraftMode] = useState<TimeMode>(timeState.mode)
   const [draftDateTime, setDraftDateTime] = useState(timeState.simulatedDateTime ?? '2026-07-30T22:00')
@@ -34,6 +35,10 @@ export default function App() {
   const useCurrentTime = () => {
     activateLive()
     dialogRef.current?.close()
+  }
+  const toggleMarked = (performanceId: string) => {
+    if (zoom.shouldSuppressClick()) return
+    setMarkedPerformanceIds((current) => toggleSetMembership(current, performanceId))
   }
 
   return (
@@ -113,20 +118,24 @@ export default function App() {
                   const statusLabel = status === 'current'
                     ? 'Playing now'
                     : status === 'past' ? 'Past performance' : 'Upcoming performance'
+                  const isMarked = markedPerformanceIds.has(performance.id)
                   return (
-                    <article
-                      className={`performance performance--${status}`}
+                    <button
+                      type="button"
+                      className={`performance performance--${status}${isMarked ? ' performance--marked' : ''}`}
                       key={performance.id}
                       style={{
                         top: position.top * zoom.scale,
                         height: position.height * zoom.scale,
                       } as CSSProperties}
-                      aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}`}
+                      aria-pressed={isMarked}
+                      aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}. ${isMarked ? 'Marked' : 'Not marked'}`}
+                      onClick={() => toggleMarked(performance.id)}
                     >
                       <time>{formatTime(performance.start)}</time>
                       <strong>{performance.artist}</strong>
                       <span className="visually-hidden">{statusLabel}</span>
-                    </article>
+                    </button>
                   )
                 })}
               </section>

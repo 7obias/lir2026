@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
-import { blockPosition, minutesFrom, performanceStatus, PIXELS_PER_MINUTE, stageColumnWidth } from './timetable'
+import { blockPosition, minutesFrom, performanceStatus, PIXELS_PER_MINUTE, stageColumnWidth, toggleSetMembership } from './timetable'
 
 describe('official Thursday timetable data', () => {
   it('uses known stages, unique IDs, valid ranges, and the Thursday festival window', () => {
@@ -70,5 +70,16 @@ describe('performance state', () => {
 
   it('keeps later sets future', () => {
     expect(performanceStatus(performance, new Date('2026-07-30T19:00:00.000Z'))).toBe('future')
+  })
+})
+
+describe('session-only performance marking', () => {
+  it('toggles an ID without mutating the prior set', () => {
+    const original = new Set(['first'])
+    const marked = toggleSetMembership(original, 'second')
+    const unmarked = toggleSetMembership(marked, 'second')
+    expect(original).toEqual(new Set(['first']))
+    expect(marked).toEqual(new Set(['first', 'second']))
+    expect(unmarked).toEqual(new Set(['first']))
   })
 })

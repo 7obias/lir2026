@@ -29,6 +29,8 @@ The timetable may change. Check the official source for the latest information.
 - Live or session-only simulated time with a matching timetable cursor
 - Past/current/upcoming performance states based on the active timetable time
 - Timetable-only two-finger zoom from 1× to 2.5× with sticky stage and time headers
+- Session-only performance marking by tapping a set block
+- iPhone landscape safe-area insets for the sticky time rail
 
 Landscape orientation is strongly recommended. At common iPhone landscape widths, the time column and all seven stage columns fit without horizontal panning. Portrait orientation displays a rotation recommendation and allows horizontal scrolling as a fallback.
 

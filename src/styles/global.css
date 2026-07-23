@@ -33,7 +33,7 @@ body { background: #07080c; overflow-x: hidden }
 
 .compact-header {
   min-height: 34px;
-  padding: 0 max(8px, env(safe-area-inset-left));
+  padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
   display: flex;
   align-items: center;
   gap: 7px;
@@ -91,6 +91,8 @@ body { background: #07080c; overflow-x: hidden }
 .timetable-scroll {
   width: 100%;
   min-width: 0;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -134,7 +136,7 @@ body { background: #07080c; overflow-x: hidden }
 .time-heading { font-size: 7px; color: var(--muted) }
 .time-heading {
   position: sticky;
-  left: 0;
+  left: env(safe-area-inset-left);
   z-index: 14;
   background: #11131a;
 }
@@ -151,7 +153,7 @@ body { background: #07080c; overflow-x: hidden }
 
 .time-column {
   position: sticky;
-  left: 0;
+  left: env(safe-area-inset-left);
   z-index: 8;
   grid-column: 1;
   height: 100%;
@@ -197,7 +199,7 @@ body { background: #07080c; overflow-x: hidden }
 
 .current-time-label {
   position: sticky;
-  left: calc(var(--time-width) + 2px);
+  left: calc(env(safe-area-inset-left) + var(--time-width) + 2px);
   display: block;
   width: max-content;
   transform: translateY(-50%);
@@ -245,6 +247,11 @@ body { background: #07080c; overflow-x: hidden }
   border-left-width: 2px;
   border-radius: 1px;
   background: color-mix(in srgb, var(--stage-color) 15%, #13151b);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
 }
 
 .performance--future {
@@ -269,6 +276,28 @@ body { background: #07080c; overflow-x: hidden }
 
 .performance--past time { color: #979aa3 }
 .performance--past strong { color: #b8bac1 }
+
+.performance--marked {
+  outline: 2px solid #fff0a3;
+  outline-offset: -2px;
+}
+
+.performance--marked::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff0a3;
+  box-shadow: 0 0 0 1px #27230f;
+}
+
+.performance:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
 
 .performance time {
   display: block;

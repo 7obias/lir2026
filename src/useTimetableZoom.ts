@@ -41,6 +41,7 @@ type Gesture = {
   contentX: number
   contentY: number
   bodyWidth: number
+  fixedHorizontalInset: number
 }
 
 export function useTimetableZoom(
@@ -49,6 +50,7 @@ export function useTimetableZoom(
 ) {
   const [zoom, setZoom] = useState<TimetableZoomState>({ scale: 1 })
   const gestureRef = useRef<Gesture | undefined>(undefined)
+  const suppressClickUntilRef = useRef(0)
   const scaleRef = useRef(zoom.scale)
   scaleRef.current = zoom.scale
 
@@ -62,12 +64,18 @@ export function useTimetableZoom(
       event.preventDefault()
       const midpoint = touchMidpoint(event.touches[0], event.touches[1])
       const rect = scroller.getBoundingClientRect()
+      const timeColumn = body.querySelector<HTMLElement>('.time-column')
+      const fixedHorizontalInset = timeColumn
+        ? timeColumn.getBoundingClientRect().right - rect.left
+        : TIME_COLUMN_WIDTH
+      suppressClickUntilRef.current = performance.now() + 500
       gestureRef.current = {
         startDistance: touchDistance(event.touches[0], event.touches[1]),
         startScale: scaleRef.current,
         contentX: scroller.scrollLeft + midpoint.x - rect.left,
         contentY: scroller.scrollTop + midpoint.y - rect.top,
         bodyWidth: body.getBoundingClientRect().width,
+        fixedHorizontalInset,
       }
     }
 
@@ -75,6 +83,7 @@ export function useTimetableZoom(
       const gesture = gestureRef.current
       if (!gesture || event.touches.length !== 2) return
       event.preventDefault()
+      suppressClickUntilRef.current = performance.now() + 500
       const midpoint = touchMidpoint(event.touches[0], event.touches[1])
       const rect = scroller.getBoundingClientRect()
       const nextScale = zoomFromDistances(
@@ -88,13 +97,21 @@ export function useTimetableZoom(
       const stageRatio = (gesture.bodyWidth * ratio - TIME_COLUMN_WIDTH) / (gesture.bodyWidth - TIME_COLUMN_WIDTH)
       setZoom({ scale: nextScale })
       requestAnimationFrame(() => {
-        scroller.scrollLeft = anchoredScrollOffset(gesture.contentX, localX, TIME_COLUMN_WIDTH, stageRatio)
+        scroller.scrollLeft = anchoredScrollOffset(
+          gesture.contentX,
+          localX,
+          gesture.fixedHorizontalInset,
+          stageRatio,
+        )
         scroller.scrollTop = anchoredScrollOffset(gesture.contentY, localY, STAGE_HEADER_HEIGHT, ratio)
       })
     }
 
     const end = (event: TouchEvent) => {
-      if (event.touches.length < 2) gestureRef.current = undefined
+      if (event.touches.length < 2) {
+        suppressClickUntilRef.current = performance.now() + 400
+        gestureRef.current = undefined
+      }
     }
 
     body.addEventListener('touchstart', start, { passive: false })
@@ -109,5 +126,8 @@ export function useTimetableZoom(
     }
   }, [bodyRef, scrollerRef])
 
-  return zoom
+  return {
+    ...zoom,
+    shouldSuppressClick: () => performance.now() < suppressClickUntilRef.current,
+  }
 }
