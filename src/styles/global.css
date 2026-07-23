@@ -127,8 +127,9 @@ body { background: #07080c; overflow-x: hidden }
   width: 100%;
   min-width: 0;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-color: #434753 #0b0d12;
 }
 
@@ -338,16 +339,6 @@ body { background: #07080c; overflow-x: hidden }
   color: #090a0d;
 }
 
-.performance--liked::after {
-  content: "♥";
-  position: absolute;
-  top: var(--performance-padding);
-  right: var(--performance-padding);
-  color: #090a0d;
-  font-size: var(--liked-dot-size);
-  line-height: 1;
-}
-
 .performance.performance--liked time,
 .performance.performance--liked strong { color: #090a0d }
 
@@ -361,14 +352,8 @@ body { background: #07080c; overflow-x: hidden }
 }
 
 .performance.performance--past.performance--liked time,
-.performance.performance--past.performance--liked strong,
-.performance.performance--past.performance--liked::after {
+.performance.performance--past.performance--liked strong {
   color: #fff;
-}
-
-.performance.performance--current.performance--liked {
-  border-color: #f2f3f5;
-  border-left-color: var(--stage-color);
 }
 
 .performance-content {
@@ -380,6 +365,10 @@ body { background: #07080c; overflow-x: hidden }
   outline: 2px solid #fff;
   outline-offset: 1px;
   z-index: 5;
+}
+
+.performance.performance--liked:focus-visible {
+  outline-color: #090a0d;
 }
 
 .performance time {
@@ -460,7 +449,6 @@ footer {
 .dialog-actions .apply-button { border-color: #4fb8cd; background: #265c67 }
 
 @media (orientation: portrait) and (max-width: 700px) {
-  .timetable-scroll { overflow-x: auto }
   .timetable { min-width: var(--portrait-min-width) }
   .compact-header { flex-wrap: wrap; padding-block: 4px }
   .header-title { flex: 1 1 auto }

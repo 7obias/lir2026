@@ -87,7 +87,6 @@ export default function App() {
               '--performance-spacing': `${zoom.scale}px`,
               '--performance-accent-width': `${2 * zoom.scale}px`,
               '--liked-accent-width': `${3 * zoom.scale}px`,
-              '--liked-dot-size': `${5 * zoom.scale}px`,
             } as CSSProperties}
           >
           <div className="stage-row">
