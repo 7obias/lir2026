@@ -16,25 +16,51 @@ body { background: #07080c; overflow-x: hidden }
 .app {
   min-height: 100vh;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   padding-top: env(safe-area-inset-top);
 }
 
 .compact-header {
-  height: 31px;
+  min-height: 34px;
   padding: 0 max(8px, env(safe-area-inset-left));
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   border-bottom: 1px solid var(--line);
   background: #0d0f15;
   white-space: nowrap;
 }
 
-.compact-header strong { font-size: 12px; letter-spacing: .02em }
-.compact-header span { font-size: 10px; color: #d8dae0 }
-.compact-header small { margin-left: auto; font-size: 8px; color: var(--muted) }
-.rotate-note { display: none; margin: 0; padding: 5px 8px; color: #e8c85d; background: #191609; font-size: 10px; text-align: center }
+.header-logo {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  object-fit: contain;
+}
+
+.header-title { min-width: 0; display: flex; align-items: baseline; gap: 7px }
+.header-title strong { font-size: 11px; letter-spacing: .02em }
+.header-title span { font-size: 9px; color: #d8dae0 }
+
+.time-control-button {
+  min-height: 26px;
+  margin-left: auto;
+  padding: 3px 6px;
+  border: 1px solid #343844;
+  border-radius: 3px;
+  color: #e9eaf0;
+  background: #171a22;
+  font: inherit;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.time-control-button b { color: #e8c85d; font-size: 8px }
+.time-control-button:focus-visible,
+.time-dialog button:focus-visible,
+.time-dialog input:focus-visible { outline: 2px solid #6ed5e9; outline-offset: 1px }
 
 .timetable-scroll {
   width: 100%;
@@ -80,6 +106,12 @@ body { background: #07080c; overflow-x: hidden }
 }
 
 .time-heading { font-size: 7px; color: var(--muted) }
+.time-heading {
+  position: sticky;
+  left: 0;
+  z-index: 14;
+  background: #11131a;
+}
 .stage-heading { padding: 1px; border-top: 2px solid var(--stage-color) }
 .stage-heading strong { font-size: clamp(7px, 1.13vw, 10px); line-height: 1.03; letter-spacing: -.01em }
 .stage-heading small { max-width: 100%; margin-top: 1px; font-size: clamp(5px, .72vw, 7px); line-height: 1; color: #b8bac2; font-weight: normal }
@@ -91,8 +123,9 @@ body { background: #07080c; overflow-x: hidden }
 }
 
 .time-column {
-  position: relative;
-  z-index: 3;
+  position: sticky;
+  left: 0;
+  z-index: 8;
   grid-column: 1;
   height: 100%;
   background: #0d0f14;
@@ -124,6 +157,33 @@ body { background: #07080c; overflow-x: hidden }
 }
 
 .guide.half-hour { border-color: #191c23 }
+
+.current-time-line {
+  position: absolute;
+  z-index: 5;
+  top: var(--current-time-top);
+  left: var(--time-width);
+  right: 0;
+  height: 1px;
+  border-top: 1px solid #ff5277;
+  pointer-events: none;
+}
+
+.current-time-label {
+  position: sticky;
+  left: calc(var(--time-width) + 2px);
+  display: block;
+  width: max-content;
+  transform: translateY(-50%);
+  padding: 1px 3px;
+  border-radius: 2px;
+  color: #fff;
+  background: #d92f57;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
 
 .stage-lane {
   position: relative;
@@ -192,15 +252,71 @@ footer {
   text-align: center;
 }
 
+.time-dialog {
+  width: min(360px, calc(100vw - 24px));
+  max-height: calc(100vh - 20px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid #3a3e49;
+  border-radius: 6px;
+  color: #f5f6f8;
+  background: #11131a;
+}
+
+.time-dialog::backdrop { background: rgb(0 0 0 / .72) }
+.time-dialog form { padding: 10px }
+.dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px }
+.dialog-heading h2 { margin: 0; font-size: 14px }
+.dialog-close { width: 28px; height: 28px; padding: 0; font-size: 18px }
+.time-dialog button {
+  min-height: 30px;
+  border: 1px solid #3a3e49;
+  border-radius: 3px;
+  color: inherit;
+  background: #1a1d26;
+  font: inherit;
+  font-size: 9px;
+}
+.time-dialog fieldset { display: flex; gap: 14px; margin: 0 0 9px; padding: 7px; border: 1px solid #30333d }
+.time-dialog legend { padding: 0 4px; color: #b9bcc5; font-size: 9px }
+.time-dialog label { display: flex; align-items: center; gap: 5px; font-size: 10px }
+.time-dialog input[type="radio"] { margin: 0 }
+.time-dialog .datetime-field { display: grid; gap: 4px; color: #b9bcc5 }
+.time-dialog input[type="datetime-local"] {
+  min-height: 32px;
+  padding: 4px 6px;
+  border: 1px solid #3a3e49;
+  border-radius: 3px;
+  color: #f5f6f8;
+  background: #090b10;
+  font: inherit;
+  font-size: 11px;
+}
+.time-dialog input:disabled { opacity: .45 }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 5px; margin-top: 10px }
+.dialog-actions button { padding: 4px 8px }
+.dialog-actions .apply-button { border-color: #4fb8cd; background: #265c67 }
+
 @media (orientation: portrait) and (max-width: 700px) {
-  .rotate-note { display: block }
   .timetable-scroll { overflow-x: auto }
   .timetable { min-width: 810px }
+  .compact-header { flex-wrap: wrap; padding-block: 4px }
+  .header-title { flex: 1 1 auto }
+  .time-control-button { flex: 0 0 auto }
 }
 
 @media (orientation: landscape) and (max-height: 450px) {
   .app { height: 100vh; overflow: hidden }
   .timetable-scroll { height: 100% }
+  .header-logo { width: 22px; height: 22px; max-width: 22px; max-height: 22px }
+}
+
+@media (orientation: landscape) and (max-width: 720px) {
+  .header-logo { width: 19px; height: 19px; max-width: 19px; max-height: 19px }
+  .header-title span { display: none }
+  .header-title strong { font-size: 10px }
+  .time-control-button { font-size: 8px }
 }
 
 @media (prefers-reduced-motion: reduce) {

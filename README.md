@@ -26,6 +26,7 @@ The timetable may change. Check the official source for the latest information.
 - Saurus
 - Complete Thursday programme through 01:00 on Friday morning
 - Europe/Prague time and 24-hour labels
+- Live or session-only simulated time with a matching timetable cursor
 
 Landscape orientation is strongly recommended. At common iPhone landscape widths, the time column and all seven stage columns fit without horizontal panning. Portrait orientation displays a rotation recommendation and allows horizontal scrolling as a fallback.
 
