@@ -7,19 +7,19 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
         id: '/lir2026/',
-        name: 'LIR 2026 Planner',
-        short_name: 'LIR Planner',
-        description: 'Offline-first personal timetable and visit planner for Lake Most, 2026.',
+        name: 'Let It Roll 2026 Thursday Timetable',
+        short_name: 'LIR Timetable',
+        description: 'Official Thursday timetable viewer for Let It Roll 2026.',
         start_url: '/lir2026/',
         scope: '/lir2026/',
         display: 'standalone',
         orientation: 'any',
         background_color: '#090a12',
-        theme_color: '#6d4aff',
+        theme_color: '#0d0f15',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -28,14 +28,12 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/lir2026/index.html',
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,csv}'],
+        globPatterns: ['**/*.{js,css,html,png}'],
         cleanupOutdatedCaches: true
       }
     })
   ],
   test: {
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
-    css: true
+    environment: 'node'
   }
 })

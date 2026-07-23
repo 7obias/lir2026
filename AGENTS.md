@@ -1,31 +1,12 @@
-# LIR 2026 Planner contributor notes
+# Contributor notes
 
-## Purpose and architecture
+This repository is intentionally a single-screen, display-only Thursday timetable.
 
-This is an offline-first, static React/TypeScript PWA for planning festival visits at Lake Most. Vite builds the application for GitHub Pages. React UI lives in `src/pages` and `src/components`; domain models are in `src/models`; pure scheduling logic is in `src/utils`; data import is in `src/services`; and all IndexedDB access goes through `src/db`.
-
-## Invariants
-
-- Keep TypeScript strict and prefer explicit domain types.
-- Keep timetable data and personal selections/settings in separate IndexedDB stores.
-- Never overwrite an imported timetable during an ordinary app upgrade.
-- Performance IDs must remain deterministic and based on normalized schedule values.
-- Use `Europe/Prague` for every festival-time calculation.
-- Keep Vite `base` exactly `/lir2026/` and all assets subpath-safe.
-- Keep navigation state-based or hash-based so GitHub Pages refreshes do not 404.
-- Do not add a backend, authentication, or remote database without explicit approval.
-- Do not add copyrighted festival or artist imagery.
-- Preserve backward compatibility for exported data where practical; reject unsupported newer schemas safely.
-
-## Required checks
-
-Before completing work, run:
-
-```sh
-npm run typecheck
-npm run lint
-npm test -- --run
-npm run build
-```
-
-Add deterministic tests for schedule, timezone, persistence, import, and user-facing behavior changes. Do not rely on the real clock unless it is deliberately mocked.
+- Keep `src/App.tsx` focused on rendering the timetable.
+- Keep official static data in `src/data/thursdayTimetable.ts`.
+- Do not add planning, selection, persistence, import, editing, routing, or account features without explicit approval.
+- Preserve explicit Europe/Prague ISO timestamps and after-midnight ordering.
+- Keep the seven-column landscape layout visible without horizontal panning at iPhone Max landscape widths.
+- Keep Vite `base` exactly `/lir2026/` and asset paths subpath-safe.
+- Timetable data and source comments must remain traceable to `https://letitroll.eu/time/`.
+- Before finishing changes, run `npm run lint`, `npm test -- --run`, and `npm run build`.
