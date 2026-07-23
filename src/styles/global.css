@@ -10,6 +10,17 @@
 }
 
 * { box-sizing: border-box }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 html, body, #root { min-height: 100%; margin: 0 }
 body { background: #07080c; overflow-x: hidden }
 
@@ -72,7 +83,7 @@ body { background: #07080c; overflow-x: hidden }
 }
 
 .timetable {
-  width: 100%;
+  width: var(--timetable-width);
   min-width: 0;
   display: grid;
   grid-template-rows: var(--header-height) var(--timeline-height);
@@ -120,6 +131,7 @@ body { background: #07080c; overflow-x: hidden }
   position: relative;
   height: var(--timeline-height);
   background: #090a0f;
+  touch-action: pan-x pan-y;
 }
 
 .time-column {
@@ -161,7 +173,6 @@ body { background: #07080c; overflow-x: hidden }
 .current-time-line {
   position: absolute;
   z-index: 5;
-  top: var(--current-time-top);
   left: var(--time-width);
   right: 0;
   height: 1px;
@@ -221,6 +232,29 @@ body { background: #07080c; overflow-x: hidden }
   background: color-mix(in srgb, var(--stage-color) 15%, #13151b);
 }
 
+.performance--future {
+  border-color: color-mix(in srgb, var(--stage-color) 58%, #30323a);
+  background: color-mix(in srgb, var(--stage-color) 15%, #13151b);
+}
+
+.performance--current {
+  z-index: 3;
+  border-color: color-mix(in srgb, var(--stage-color) 88%, white);
+  background: color-mix(in srgb, var(--stage-color) 30%, #111319);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stage-color) 48%, transparent);
+}
+
+.performance--current strong { color: #fff }
+
+.performance--past {
+  border-color: #555861;
+  border-left-color: #676a73;
+  background: #292c33;
+}
+
+.performance--past time { color: #979aa3 }
+.performance--past strong { color: #b8bac1 }
+
 .performance time {
   display: block;
   margin-bottom: 1px;
@@ -236,7 +270,7 @@ body { background: #07080c; overflow-x: hidden }
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   color: #fafafa;
-  font-size: clamp(7px, 1.05vw, 9px);
+  font-size: var(--performance-font-size);
   line-height: 1.04;
   overflow-wrap: anywhere;
 }
@@ -300,7 +334,7 @@ footer {
 
 @media (orientation: portrait) and (max-width: 700px) {
   .timetable-scroll { overflow-x: auto }
-  .timetable { min-width: 810px }
+  .timetable { min-width: var(--portrait-min-width) }
   .compact-header { flex-wrap: wrap; padding-block: 4px }
   .header-title { flex: 1 1 auto }
   .time-control-button { flex: 0 0 auto }

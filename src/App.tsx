@@ -1,7 +1,8 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
-import { blockPosition, formatTime, minutesFrom, PIXELS_PER_MINUTE } from './timetable'
+import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE } from './timetable'
 import { formatPragueDateTime, pragueLocalInputToDate, useActiveTime, type TimeMode } from './useActiveTime'
+import { useTimetableZoom } from './useTimetableZoom'
 
 const totalHeight = minutesFrom(THURSDAY_START, THURSDAY_END) * PIXELS_PER_MINUTE
 const guides = Array.from({ length: 27 }, (_, index) => {
@@ -11,6 +12,9 @@ const guides = Array.from({ length: 27 }, (_, index) => {
 
 export default function App() {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const timelineBodyRef = useRef<HTMLDivElement>(null)
+  const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
   const { activeTime, timeState, setTimeState, activateLive } = useActiveTime()
   const [draftMode, setDraftMode] = useState<TimeMode>(timeState.mode)
   const [draftDateTime, setDraftDateTime] = useState(timeState.simulatedDateTime ?? '2026-07-30T22:00')
@@ -45,8 +49,16 @@ export default function App() {
           {formatPragueDateTime(activeTime)}
         </button>
       </header>
-      <div className="timetable-scroll" aria-label="Thursday timetable">
-        <div className="timetable" style={{ '--timeline-height': `${totalHeight}px` } as CSSProperties}>
+      <div className="timetable-scroll" aria-label="Thursday timetable" ref={scrollerRef}>
+        <div
+          className="timetable"
+          style={{
+            '--timetable-width': `${zoom.scale * 100}%`,
+            '--timeline-height': `${totalHeight * zoom.scale}px`,
+            '--portrait-min-width': `${810 * zoom.scale}px`,
+            '--performance-font-size': `${Math.min(15, Math.max(7, 8 * zoom.scale))}px`,
+          } as CSSProperties}
+        >
           <div className="stage-row">
             <div className="time-heading">TIME</div>
             {stages.map((stage) => (
@@ -56,21 +68,29 @@ export default function App() {
               </div>
             ))}
           </div>
-          <div className="timeline-body">
+          <div className="timeline-body" ref={timelineBodyRef}>
             <div className="time-column">
               {guides.map((guide, index) => (
-                <time className={index % 2 ? 'half-hour' : 'hour'} style={{ top: guide.top }} key={guide.timestamp}>
+                <time
+                  className={index % 2 ? 'half-hour' : 'hour'}
+                  style={{ top: guide.top * zoom.scale }}
+                  key={guide.timestamp}
+                >
                   {formatTime(guide.timestamp)}
                 </time>
               ))}
             </div>
             {guides.map((guide, index) => (
-              <div className={index % 2 ? 'guide half-hour' : 'guide hour'} style={{ top: guide.top }} key={`guide-${guide.timestamp}`} />
+              <div
+                className={index % 2 ? 'guide half-hour' : 'guide hour'}
+                style={{ top: guide.top * zoom.scale }}
+                key={`guide-${guide.timestamp}`}
+              />
             ))}
             {showCursor && (
               <div
                 className="current-time-line"
-                style={{ '--current-time-top': `${cursorMinutes * PIXELS_PER_MINUTE}px` } as CSSProperties}
+                style={{ top: cursorMinutes * PIXELS_PER_MINUTE * zoom.scale }}
                 aria-label={`Current timetable time: ${formatTime(activeTime.toISOString())}`}
                 role="status"
               >
@@ -81,15 +101,23 @@ export default function App() {
               <section className={`stage-lane stage-${stage.order}`} aria-label={stage.name} key={stage.id}>
                 {performances.filter((performance) => performance.stageId === stage.id).map((performance) => {
                   const position = blockPosition(performance, THURSDAY_START)
+                  const status = performanceStatus(performance, activeTime)
+                  const statusLabel = status === 'current'
+                    ? 'Playing now'
+                    : status === 'past' ? 'Past performance' : 'Upcoming performance'
                   return (
                     <article
-                      className="performance"
+                      className={`performance performance--${status}`}
                       key={performance.id}
-                      style={{ top: position.top, height: position.height }}
-                      aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}`}
+                      style={{
+                        top: position.top * zoom.scale,
+                        height: position.height * zoom.scale,
+                      } as CSSProperties}
+                      aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}`}
                     >
                       <time>{formatTime(performance.start)}</time>
                       <strong>{performance.artist}</strong>
+                      <span className="visually-hidden">{statusLabel}</span>
                     </article>
                   )
                 })}

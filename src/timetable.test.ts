@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
-import { blockPosition, minutesFrom, PIXELS_PER_MINUTE, stageColumnWidth } from './timetable'
+import { blockPosition, minutesFrom, performanceStatus, PIXELS_PER_MINUTE, stageColumnWidth } from './timetable'
 
 describe('official Thursday timetable data', () => {
   it('uses known stages, unique IDs, valid ranges, and the Thursday festival window', () => {
@@ -54,5 +54,21 @@ describe('timeline positioning', () => {
   it.each([932, 844, 852])('fits the time column and seven readable stage columns at %ipx', (viewportWidth) => {
     expect(stageColumnWidth(viewportWidth)).toBeGreaterThan(115)
     expect(34 + stageColumnWidth(viewportWidth) * 7).toBe(viewportWidth)
+  })
+})
+
+describe('performance state', () => {
+  const performance = performances.find((item) => item.id === 'generator-2200-wilkinson')!
+
+  it('uses current before past or future at the start boundary', () => {
+    expect(performanceStatus(performance, new Date(performance.start))).toBe('current')
+  })
+
+  it('treats an exact end boundary as past', () => {
+    expect(performanceStatus(performance, new Date(performance.end))).toBe('past')
+  })
+
+  it('keeps later sets future', () => {
+    expect(performanceStatus(performance, new Date('2026-07-30T19:00:00.000Z'))).toBe('future')
   })
 })
