@@ -2,6 +2,7 @@ import type { Performance } from './data/thursdayTimetable'
 
 export const PIXELS_PER_MINUTE = 0.72
 export const TIME_COLUMN_WIDTH = 34
+export const STAGE_HEADER_HEIGHT = 36
 export type PerformanceStatus = 'past' | 'current' | 'future'
 
 export function minutesFrom(origin: string, value: string): number {

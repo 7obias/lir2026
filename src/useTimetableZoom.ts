@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
+import { STAGE_HEADER_HEIGHT, TIME_COLUMN_WIDTH } from './timetable'
 
 export type TimetableZoomState = {
   scale: number
@@ -16,6 +17,16 @@ export function zoomFromDistances(startScale: number, startDistance: number, cur
   return clampZoomScale(startScale * currentDistance / startDistance)
 }
 
+export function anchoredScrollOffset(
+  contentFocalPoint: number,
+  viewportFocalPoint: number,
+  fixedInset: number,
+  scalableRatio: number,
+): number {
+  const scalableFocalPoint = Math.max(0, contentFocalPoint - fixedInset)
+  return Math.max(0, fixedInset + scalableFocalPoint * scalableRatio - viewportFocalPoint)
+}
+
 const touchDistance = (first: Touch, second: Touch) =>
   Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY)
 
@@ -29,6 +40,7 @@ type Gesture = {
   startScale: number
   contentX: number
   contentY: number
+  bodyWidth: number
 }
 
 export function useTimetableZoom(
@@ -55,6 +67,7 @@ export function useTimetableZoom(
         startScale: scaleRef.current,
         contentX: scroller.scrollLeft + midpoint.x - rect.left,
         contentY: scroller.scrollTop + midpoint.y - rect.top,
+        bodyWidth: body.getBoundingClientRect().width,
       }
     }
 
@@ -72,10 +85,11 @@ export function useTimetableZoom(
       const ratio = nextScale / gesture.startScale
       const localX = midpoint.x - rect.left
       const localY = midpoint.y - rect.top
+      const stageRatio = (gesture.bodyWidth * ratio - TIME_COLUMN_WIDTH) / (gesture.bodyWidth - TIME_COLUMN_WIDTH)
       setZoom({ scale: nextScale })
       requestAnimationFrame(() => {
-        scroller.scrollLeft = gesture.contentX * ratio - localX
-        scroller.scrollTop = gesture.contentY * ratio - localY
+        scroller.scrollLeft = anchoredScrollOffset(gesture.contentX, localX, TIME_COLUMN_WIDTH, stageRatio)
+        scroller.scrollTop = anchoredScrollOffset(gesture.contentY, localY, STAGE_HEADER_HEIGHT, ratio)
       })
     }
 

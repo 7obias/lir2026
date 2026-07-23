@@ -51,6 +51,21 @@ body { background: #07080c; overflow-x: hidden }
   object-fit: contain;
 }
 
+.brand-mark {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.build-id {
+  color: #7f838e;
+  font-size: 7px;
+  line-height: 1;
+  letter-spacing: .015em;
+  white-space: nowrap;
+}
+
 .header-title { min-width: 0; display: flex; align-items: baseline; gap: 7px }
 .header-title strong { font-size: 11px; letter-spacing: .02em }
 .header-title span { font-size: 9px; color: #d8dae0 }
@@ -350,6 +365,7 @@ footer {
   .header-logo { width: 19px; height: 19px; max-width: 19px; max-height: 19px }
   .header-title span { display: none }
   .header-title strong { font-size: 10px }
+  .build-id { font-size: 6px }
   .time-control-button { font-size: 8px }
 }
 

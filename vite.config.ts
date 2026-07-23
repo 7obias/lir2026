@@ -1,9 +1,27 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execFileSync } from 'node:child_process'
 
-export default defineConfig({
+const gitValue = (args: string[], fallback: string) => {
+  try {
+    return execFileSync('git', args, { encoding: 'utf8' }).trim() || fallback
+  } catch {
+    return fallback
+  }
+}
+
+export default defineConfig(() => {
+  const buildNumber = gitValue(['rev-list', '--count', 'HEAD'], process.env.GITHUB_RUN_NUMBER ?? '0')
+  const revisionFallback = (process.env.GITHUB_SHA ?? 'unknown').slice(0, 7)
+  const revision = gitValue(['rev-parse', '--short', 'HEAD'], revisionFallback)
+
+  return {
   base: "/lir2026/",
+  define: {
+    __BUILD_NUMBER__: JSON.stringify(buildNumber),
+    __BUILD_REVISION__: JSON.stringify(revision),
+  },
   plugins: [
     react(),
     VitePWA({
@@ -35,5 +53,6 @@ export default defineConfig({
   ],
   test: {
     environment: 'node'
+  }
   }
 })

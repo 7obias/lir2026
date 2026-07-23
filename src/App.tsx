@@ -39,7 +39,15 @@ export default function App() {
   return (
     <main className="app">
       <header className="compact-header">
-        <img className="header-logo" src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" />
+        <div className="brand-mark">
+          <img className="header-logo" src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" />
+          <small
+            className="build-id"
+            aria-label={`Application build ${__BUILD_NUMBER__}, commit ${__BUILD_REVISION__}`}
+          >
+            B{__BUILD_NUMBER__} · {__BUILD_REVISION__}
+          </small>
+        </div>
         <div className="header-title">
           <strong>Let It Roll 2026</strong>
           <span>Thursday 30 July</span>
