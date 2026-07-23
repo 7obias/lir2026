@@ -3,7 +3,7 @@ import type { MapStageLocation } from './data/mapStageLocations'
 import { useLiveMapPosition } from './useLiveMapPosition'
 import { calibrationAdminEnabled, useMapCalibration } from './useMapCalibration'
 import { MapCalibrationPanel } from './MapCalibrationPanel'
-import type { StabilizedGpsReading } from './useCalibrationGps'
+import { useCalibrationGps, type StabilizedGpsReading } from './useCalibrationGps'
 import type { MapPoint } from './festivalMapGeo'
 
 type FestivalMapProps = {
@@ -11,17 +11,28 @@ type FestivalMapProps = {
   onClose: () => void
 }
 
+type CalibrationFlow = 'idle' | 'capturing' | 'placing' | 'confirming'
+
 export function FestivalMap({ location, onClose }: FestivalMapProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const calibration = useMapCalibration()
   const tracking = useLiveMapPosition(Boolean(location), calibration.transform)
+  const calibrationGps = useCalibrationGps()
   const [calibrationOpen, setCalibrationOpen] = useState(false)
+  const [calibrationFlow, setCalibrationFlow] = useState<CalibrationFlow>('idle')
   const [pendingReading, setPendingReading] = useState<(StabilizedGpsReading & { label: string })>()
+  const [placementPreview, setPlacementPreview] = useState<MapPoint>()
+  const [calibrationLabel, setCalibrationLabel] = useState('')
   const [simulationActive, setSimulationActive] = useState(false)
   const [simulatedPosition, setSimulatedPosition] = useState<MapPoint>()
-  const mapTapRef = useRef<{ x: number; y: number; moved: boolean } | undefined>(undefined)
+  const mapTapRef = useRef<{
+    x: number
+    y: number
+    pointerId: number
+    moved: boolean
+  } | undefined>(undefined)
   const dragRef = useRef<{ id: string } | undefined>(undefined)
   const adminEnabled = calibrationAdminEnabled()
 
@@ -60,35 +71,91 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
   }
 
   const onMapPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if ((!pendingReading && !simulationActive) || event.button !== 0) return
-    mapTapRef.current = { x: event.clientX, y: event.clientY, moved: false }
+    if ((calibrationFlow !== 'placing' && !simulationActive) || event.button !== 0) return
+    if (calibrationFlow === 'placing' && !(event.target instanceof HTMLImageElement)) return
+    if (mapTapRef.current) {
+      mapTapRef.current.moved = true
+      return
+    }
+    mapTapRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      pointerId: event.pointerId,
+      moved: false,
+    }
   }
 
   const onMapPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const start = mapTapRef.current
-    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) start.moved = true
+    if (
+      start
+      && (event.pointerId !== start.pointerId
+        || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8)
+    ) start.moved = true
   }
 
   const onMapPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const start = mapTapRef.current
     mapTapRef.current = undefined
-    if (!start || start.moved) return
+    if (!start || start.pointerId !== event.pointerId || start.moved) return
     const point = mapPercent(event.clientX, event.clientY)
     if (!point) return
-    if (pendingReading) {
-      calibration.addPoint({
-        id: crypto.randomUUID(),
-        latitude: pendingReading.latitude,
-        longitude: pendingReading.longitude,
-        accuracyMeters: pendingReading.accuracyMeters,
-        ...point,
-        label: pendingReading.label || undefined,
-        createdAt: new Date().toISOString(),
-      })
-      setPendingReading(undefined)
+    if (calibrationFlow === 'placing' && pendingReading) {
+      setPlacementPreview(point)
+      setCalibrationFlow('confirming')
     } else if (simulationActive) {
       setSimulatedPosition(point)
     }
+  }
+
+  const cancelCalibrationFlow = () => {
+    calibrationGps.cancel()
+    setCalibrationFlow('idle')
+    setPendingReading(undefined)
+    setPlacementPreview(undefined)
+    setCalibrationLabel('')
+  }
+
+  const beginCalibrationFlow = () => {
+    tracking.stop()
+    setSimulationActive(false)
+    setSimulatedPosition(undefined)
+    setCalibrationOpen(true)
+    setPendingReading(undefined)
+    setPlacementPreview(undefined)
+    setCalibrationLabel('')
+    setCalibrationFlow('capturing')
+    calibrationGps.start()
+  }
+
+  const acceptCalibrationReading = (acceptedReading?: StabilizedGpsReading) => {
+    const reading = acceptedReading ?? calibrationGps.accept()
+    if (!reading) return
+    setPendingReading({ ...reading, label: calibrationLabel })
+    setCalibrationFlow('placing')
+  }
+
+  useEffect(() => {
+    if (calibrationFlow === 'capturing' && calibrationGps.reading?.stable) {
+      acceptCalibrationReading()
+    }
+  }, [calibrationFlow, calibrationGps.reading?.stable])
+
+  const saveCalibrationPoint = () => {
+    if (!pendingReading || !placementPreview) return
+    calibration.addPoint({
+      id: crypto.randomUUID(),
+      latitude: pendingReading.latitude,
+      longitude: pendingReading.longitude,
+      accuracyMeters: pendingReading.accuracyMeters,
+      ...placementPreview,
+      label: calibrationLabel.trim() || undefined,
+      createdAt: new Date().toISOString(),
+    })
+    setCalibrationFlow('idle')
+    setPendingReading(undefined)
+    setPlacementPreview(undefined)
+    setCalibrationLabel('')
   }
 
   const startMarkerDrag = (event: PointerEvent<HTMLButtonElement>, id: string) => {
@@ -120,6 +187,22 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
         heading: 0,
       }
     : tracking.position
+  const calibrationButtonLabel = calibrationFlow === 'capturing'
+    ? 'Capturing GPS…'
+    : calibrationFlow === 'placing'
+      ? 'Tap position on map'
+      : calibrationFlow === 'confirming'
+        ? 'Confirm calibration point'
+        : 'Add calibration point'
+  const calibrationStatus = calibration.quality.activeCount === 0
+    ? 'Not calibrated'
+    : calibration.quality.activeCount === 1
+      ? '1 calibration point'
+      : calibration.quality.activeCount === 2
+        ? '2 points — provisional'
+        : calibration.quality.activeCount === 3
+          ? '3 points — usable'
+          : `${calibration.quality.activeCount} points — ${calibration.quality.status === 'Good calibration' ? 'good' : 'usable'}`
 
   return (
     <dialog
@@ -127,9 +210,13 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
       ref={dialogRef}
       aria-labelledby="map-title"
       onClick={closeFromBackdrop}
-      onClose={onClose}
+      onClose={() => {
+        cancelCalibrationFlow()
+        setCalibrationOpen(false)
+        onClose()
+      }}
     >
-      <section className="map-panel">
+      <section className={`map-panel${calibrationFlow !== 'idle' ? ' map-panel--calibrating' : ''}`}>
         <header className="map-toolbar">
           <div>
             <strong id="map-title">Festival map</strong>
@@ -137,14 +224,31 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
           </div>
           <div className="map-toolbar-actions">
             {adminEnabled && (
-              <button
-                type="button"
-                className={`map-calibrate-button${calibrationOpen ? ' map-calibrate-button--active' : ''}`}
-                aria-pressed={calibrationOpen}
-                onClick={() => setCalibrationOpen((current) => !current)}
-              >
-                Calibrate map
-              </button>
+              <>
+                <span className="map-calibration-status">{calibrationStatus}</span>
+                <button
+                  type="button"
+                  className="map-manage-calibration"
+                  disabled={calibrationFlow !== 'idle'}
+                  onClick={() => setCalibrationOpen(true)}
+                >
+                  Manage calibration
+                </button>
+                <button
+                  type="button"
+                  className={`map-calibrate-button${calibrationFlow !== 'idle' ? ' map-calibrate-button--active' : ''}`}
+                  aria-label={calibrationButtonLabel}
+                  disabled={calibrationFlow !== 'idle'}
+                  onClick={beginCalibrationFlow}
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M12 21s6-5.6 6-12a6 6 0 1 0-12 0c0 6.4 6 12 6 12Z" />
+                    <path d="M12 6v6M9 9h6" />
+                  </svg>
+                  <span>{calibrationButtonLabel}</span>
+                  {calibration.quality.activeCount > 0 && <b>{calibration.quality.activeCount}</b>}
+                </button>
+              </>
             )}
             <button
               type="button"
@@ -152,6 +256,7 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
               aria-label={tracking.status === 'active' ? 'Hide my position' : 'Show my position'}
               aria-pressed={tracking.status === 'active'}
               title={tracking.status === 'active' ? 'Hide my position' : 'Show my position'}
+              disabled={calibrationFlow !== 'idle'}
               onClick={() => {
                 if (tracking.status === 'active' || tracking.status === 'acquiring') tracking.stop()
                 else {
@@ -167,24 +272,38 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
               {tracking.status === 'acquiring' && <span className="map-location-spinner" />}
               {tracking.status === 'error' && <span className="map-location-warning">!</span>}
             </button>
+            {adminEnabled && calibrationFlow !== 'idle' && (
+              <button type="button" className="map-calibration-cancel" onClick={cancelCalibrationFlow}>
+                Cancel
+              </button>
+            )}
             <button type="button" aria-label="Close festival map" onClick={close}>×</button>
           </div>
         </header>
-        {!calibration.transform && (
+        {!calibration.transform && calibrationFlow === 'idle' && (
           <p className="map-calibration-unavailable" role="status">
             Map not sufficiently calibrated · real position display unavailable
           </p>
         )}
-        {calibration.quality.model === 'similarity' && (
+        {calibration.quality.model === 'similarity' && calibrationFlow === 'idle' && (
           <p className="map-calibration-unavailable" role="status">
             Provisional two-point calibration · position is approximate
           </p>
         )}
         {simulationActive && <p className="map-simulation-badge">SIMULATED GPS · tap map to move</p>}
+        {calibrationFlow === 'capturing' && (
+          <p className="map-placement-banner" role="status">Capturing current GPS position…</p>
+        )}
+        {calibrationFlow === 'placing' && (
+          <p className="map-placement-banner" role="status">Now tap your exact position on the festival map</p>
+        )}
+        {calibrationFlow === 'confirming' && (
+          <p className="map-placement-banner" role="status">Confirm the selected calibration point</p>
+        )}
         {tracking.message && <p className="map-location-message" role="status">{tracking.message}</p>}
         <div className="map-viewport" ref={viewportRef}>
           <div
-            className={`map-canvas${pendingReading || simulationActive ? ' map-canvas--placing' : ''}`}
+            className={`map-canvas${calibrationFlow === 'placing' || simulationActive ? ' map-canvas--placing' : ''}`}
             ref={canvasRef}
             onPointerDown={onMapPointerDown}
             onPointerMove={onMapPointerMove}
@@ -256,6 +375,14 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
                 })}
               </>
             )}
+            {placementPreview && (
+              <span
+                className="map-calibration-preview"
+                style={{ left: `${placementPreview.xPercent}%`, top: `${placementPreview.yPercent}%` }}
+                role="status"
+                aria-label="Selected calibration point preview"
+              />
+            )}
             {displayedPosition && (
               <div
                 className="map-user-location"
@@ -293,22 +420,31 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             quality={calibration.quality}
             storageMessage={calibration.storageMessage}
             canUndo={calibration.canUndo}
-            awaitingMapPoint={Boolean(pendingReading)}
+            flow={calibrationFlow}
+            gps={calibrationGps}
+            label={calibrationLabel}
+            hasPlacementPreview={Boolean(placementPreview)}
             simulationActive={simulationActive}
-            onCaptureAccepted={(reading, label) => setPendingReading({ ...reading, label })}
+            onLabelChange={setCalibrationLabel}
+            onAcceptCalibrationReading={acceptCalibrationReading}
+            onSaveCalibrationPoint={saveCalibrationPoint}
+            onChooseAnotherPoint={() => {
+              setPlacementPreview(undefined)
+              setCalibrationFlow('placing')
+            }}
+            onCancelFlow={cancelCalibrationFlow}
             onReplaceReading={(id, reading) => calibration.patchPoint(id, {
               latitude: reading.latitude,
               longitude: reading.longitude,
               accuracyMeters: reading.accuracyMeters,
               createdAt: new Date().toISOString(),
             })}
-            onCancelMapPoint={() => setPendingReading(undefined)}
             onPatchPoint={calibration.patchPoint}
             onDeletePoint={calibration.deletePoint}
             onUndo={calibration.undo}
             onReset={() => {
               calibration.reset()
-              setPendingReading(undefined)
+              cancelCalibrationFlow()
             }}
             onExport={calibration.exportJson}
             onImport={calibration.importJson}
@@ -320,8 +456,8 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
               })
             }}
             onClose={() => {
+              if (calibrationFlow !== 'idle') cancelCalibrationFlow()
               setCalibrationOpen(false)
-              setPendingReading(undefined)
             }}
           />
         )}

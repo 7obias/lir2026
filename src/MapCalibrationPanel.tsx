@@ -1,7 +1,7 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import type { FestivalMapCalibrationPoint } from './data/festivalMapCalibration'
 import type { CalibrationQuality, FestivalMapTransform } from './festivalMapGeo'
-import { useCalibrationGps, type StabilizedGpsReading } from './useCalibrationGps'
+import type { StabilizedGpsReading, useCalibrationGps } from './useCalibrationGps'
 
 type MapCalibrationPanelProps = {
   points: FestivalMapCalibrationPoint[]
@@ -9,11 +9,17 @@ type MapCalibrationPanelProps = {
   quality: CalibrationQuality
   storageMessage: string
   canUndo: boolean
-  awaitingMapPoint: boolean
+  flow: 'idle' | 'capturing' | 'placing' | 'confirming'
+  gps: ReturnType<typeof useCalibrationGps>
+  label: string
+  hasPlacementPreview: boolean
   simulationActive: boolean
-  onCaptureAccepted: (reading: StabilizedGpsReading, label: string) => void
+  onLabelChange: (label: string) => void
+  onAcceptCalibrationReading: (reading: StabilizedGpsReading) => void
+  onSaveCalibrationPoint: () => void
+  onChooseAnotherPoint: () => void
+  onCancelFlow: () => void
   onReplaceReading: (id: string, reading: StabilizedGpsReading) => void
-  onCancelMapPoint: () => void
   onPatchPoint: (id: string, patch: Partial<FestivalMapCalibrationPoint>) => void
   onDeletePoint: (id: string) => void
   onUndo: () => void
@@ -34,11 +40,17 @@ export function MapCalibrationPanel({
   quality,
   storageMessage,
   canUndo,
-  awaitingMapPoint,
+  flow,
+  gps,
+  label,
+  hasPlacementPreview,
   simulationActive,
-  onCaptureAccepted,
+  onLabelChange,
+  onAcceptCalibrationReading,
+  onSaveCalibrationPoint,
+  onChooseAnotherPoint,
+  onCancelFlow,
   onReplaceReading,
-  onCancelMapPoint,
   onPatchPoint,
   onDeletePoint,
   onUndo,
@@ -48,8 +60,6 @@ export function MapCalibrationPanel({
   onToggleSimulation,
   onClose,
 }: MapCalibrationPanelProps) {
-  const gps = useCalibrationGps()
-  const [label, setLabel] = useState('')
   const [replaceId, setReplaceId] = useState<string>()
   const [importError, setImportError] = useState('')
   const importRef = useRef<HTMLInputElement>(null)
@@ -66,8 +76,7 @@ export function MapCalibrationPanel({
       onReplaceReading(replaceId, reading)
       setReplaceId(undefined)
     } else {
-      onCaptureAccepted(reading, label.trim())
-      setLabel('')
+      onAcceptCalibrationReading(reading)
     }
   }
 
@@ -121,15 +130,12 @@ export function MapCalibrationPanel({
         </small>
       </section>
 
-      {!awaitingMapPoint && gps.status !== 'sampling' && (
+      {flow !== 'idle' && (
         <div className="calibration-capture">
           <label>
             Optional landmark label
-            <input value={label} onChange={(event) => setLabel(event.target.value)} placeholder="Main entrance" />
+            <input value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Main entrance" />
           </label>
-          <button type="button" className="calibration-primary" onClick={() => beginCapture()}>
-            Use my current position
-          </button>
         </div>
       )}
 
@@ -147,9 +153,9 @@ export function MapCalibrationPanel({
           ) : <span>Waiting for the first reading…</span>}
           <p>{gps.message}</p>
           <div className="calibration-actions">
-            <button type="button" onClick={cancelCapture}>Cancel</button>
+            <button type="button" onClick={replaceId ? cancelCapture : onCancelFlow}>Cancel</button>
             <button type="button" disabled={!gps.reading} onClick={acceptReading}>
-              Accept current reading
+              {gps.reading?.stable ? 'Use stable reading' : 'Accept current reading'}
             </button>
           </div>
         </section>
@@ -157,15 +163,30 @@ export function MapCalibrationPanel({
 
       {gps.status === 'error' && (
         <p className="calibration-error" role="alert">
-          {gps.message} <button type="button" onClick={cancelCapture}>Dismiss</button>
+          {gps.message}{' '}
+          <button type="button" onClick={replaceId ? cancelCapture : onCancelFlow}>Dismiss</button>
         </p>
       )}
 
-      {awaitingMapPoint && (
+      {flow === 'placing' && (
         <section className="calibration-map-prompt" aria-live="polite">
-          <b>Now tap the matching point on the map</b>
-          <span>Only this next deliberate map tap will save the point.</span>
-          <button type="button" onClick={onCancelMapPoint}>Cancel</button>
+          <b>Now tap your exact position on the festival map</b>
+          <span>A drag pans and a pinch zooms. Only a short deliberate tap selects the point.</span>
+          <button type="button" onClick={onCancelFlow}>Cancel</button>
+        </section>
+      )}
+
+      {flow === 'confirming' && hasPlacementPreview && (
+        <section className="calibration-map-prompt calibration-confirm" aria-live="polite">
+          <b>Confirm calibration point</b>
+          <span>The crosshair is only a preview. Nothing is saved until you confirm.</span>
+          <div className="calibration-actions">
+            <button type="button" onClick={onCancelFlow}>Cancel</button>
+            <button type="button" onClick={onChooseAnotherPoint}>Choose another point</button>
+            <button type="button" className="calibration-primary" onClick={onSaveCalibrationPoint}>
+              Save calibration point
+            </button>
+          </div>
         </section>
       )}
 
@@ -202,7 +223,10 @@ export function MapCalibrationPanel({
                   onChange={(event) => onPatchPoint(point.id, { label: event.target.value })}
                 />
               </label>
-              <span>GPS ±{point.accuracyMeters.toFixed(1)} m · residual {metres(residual?.errorMeters)}</span>
+              <span>
+                GPS ±{point.accuracyMeters.toFixed(1)} m · {new Date(point.createdAt).toLocaleString()}
+                {' · '}residual {metres(residual?.errorMeters)}
+              </span>
               {residual?.likelyIncorrect && <em>Likely incorrect point</em>}
               <div>
                 <label>

@@ -546,15 +546,67 @@ footer {
 
 .map-toolbar .map-calibrate-button {
   width: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 0 7px;
   font-size: 9px;
   white-space: nowrap;
+}
+
+.map-toolbar .map-calibrate-button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.map-toolbar .map-calibrate-button b {
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  color: #111;
+  background: #e8c85d;
+  font-size: 8px;
+  line-height: 14px;
 }
 
 .map-toolbar .map-calibrate-button--active {
   border-color: #e8c85d;
   color: #111;
   background: #e8c85d;
+}
+
+.map-toolbar .map-calibrate-button:disabled { opacity: 1 }
+
+.map-toolbar .map-manage-calibration,
+.map-toolbar .map-calibration-cancel {
+  width: auto;
+  padding: 0 6px;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.map-toolbar .map-calibration-cancel {
+  border-color: #a65e54;
+  color: #ffd3cc;
+  background: #4b2521;
+}
+
+.map-calibration-status {
+  max-width: 105px;
+  overflow: hidden;
+  color: #c5c8d0 !important;
+  font-size: 8px !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-panel--calibrating .map-location-button,
+.map-panel--calibrating .map-manage-calibration {
+  opacity: .38;
 }
 
 .map-toolbar .map-location-button {
@@ -640,6 +692,27 @@ footer {
   background: rgb(25 20 14 / .92);
   font-size: 8px;
   line-height: 1.2;
+  pointer-events: none;
+}
+
+.map-placement-banner {
+  position: absolute;
+  z-index: 19;
+  top: 42px;
+  left: 50%;
+  max-width: min(430px, 78vw);
+  margin: 0;
+  padding: 6px 10px;
+  transform: translateX(-50%);
+  border: 2px solid #ffe15a;
+  border-radius: 3px;
+  color: #111;
+  background: #ffe15a;
+  box-shadow: 0 2px 7px #000;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
   pointer-events: none;
 }
 
@@ -801,6 +874,22 @@ footer {
   opacity: .58;
   background: #aaa;
   text-decoration: line-through;
+}
+
+.map-calibration-preview {
+  position: absolute;
+  z-index: 9;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background:
+    linear-gradient(#ff335f, #ff335f) center / 2px 100% no-repeat,
+    linear-gradient(90deg, #ff335f, #ff335f) center / 100% 2px no-repeat,
+    rgb(0 0 0 / .18);
+  box-shadow: 0 0 0 3px #d51f47, 0 2px 7px #000;
+  pointer-events: none;
 }
 
 .calibration-panel {
