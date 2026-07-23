@@ -26,7 +26,7 @@ export default defineConfig(() => {
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'],
+      includeAssets: ['apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png', 'maps/lir26-map.jpg'],
       manifest: {
         id: '/lir2026/',
         name: 'Let It Roll 2026 Thursday Timetable',
@@ -46,7 +46,8 @@ export default defineConfig(() => {
       },
       workbox: {
         navigateFallback: '/lir2026/index.html',
-        globPatterns: ['**/*.{js,css,html,png}'],
+        globPatterns: ['**/*.{js,css,html,png,jpg}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true
       }
     })

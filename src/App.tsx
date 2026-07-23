@@ -4,6 +4,9 @@ import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_M
 import { formatPragueDateTime, pragueLocalInputToDate, useActiveTime, type TimeMode } from './useActiveTime'
 import { useLikedPerformances } from './useLikedPerformances'
 import { useTimetableZoom } from './useTimetableZoom'
+import { FestivalMap } from './FestivalMap'
+import { mapStageLocationsById, type MapStageLocation } from './data/mapStageLocations'
+import { useStageMapTap } from './useStageMapTap'
 
 const totalHeight = minutesFrom(THURSDAY_START, THURSDAY_END) * PIXELS_PER_MINUTE
 const performanceIds = new Set(performances.map(({ id }) => id))
@@ -18,6 +21,8 @@ export default function App() {
   const timelineBodyRef = useRef<HTMLDivElement>(null)
   const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
   const liking = useLikedPerformances(performanceIds, zoom.shouldSuppressClick)
+  const [mapStage, setMapStage] = useState<MapStageLocation>()
+  const stageMapTap = useStageMapTap((stageId) => setMapStage(mapStageLocationsById.get(stageId)))
   const { activeTime, timeState, setTimeState, activateLive } = useActiveTime()
   const [draftMode, setDraftMode] = useState<TimeMode>(timeState.mode)
   const [draftDateTime, setDraftDateTime] = useState(timeState.simulatedDateTime ?? '2026-07-30T22:00')
@@ -88,10 +93,26 @@ export default function App() {
           <div className="stage-row">
             <div className="time-heading">TIME</div>
             {stages.map((stage) => (
-              <div className={`stage-heading stage-${stage.order}`} key={stage.id}>
+              <button
+                type="button"
+                className={`stage-heading stage-${stage.order}`}
+                key={stage.id}
+                data-map-stage-id={stage.id}
+                aria-label={`Show ${stage.name} on festival map`}
+                onPointerDown={(event) => stageMapTap.onPointerDown(event, stage.id)}
+                onPointerMove={stageMapTap.onPointerMove}
+                onPointerUp={stageMapTap.onPointerUp}
+                onPointerCancel={stageMapTap.onPointerCancel}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    setMapStage(mapStageLocationsById.get(stage.id))
+                  }
+                }}
+              >
                 <strong>{stage.name}</strong>
                 {stage.subtitle && <small>{stage.subtitle}</small>}
-              </div>
+              </button>
             ))}
           </div>
           <div className="timeline-body" ref={timelineBodyRef}>
@@ -170,6 +191,7 @@ export default function App() {
       </div>
       </div>
       <footer>Timetable data sourced from the official Let It Roll 2026 timetable. Schedule may change.</footer>
+      <FestivalMap location={mapStage} onClose={() => setMapStage(undefined)} />
       <dialog className="time-dialog" ref={dialogRef}>
         <form method="dialog" onSubmit={(event) => event.preventDefault()}>
           <div className="dialog-heading">

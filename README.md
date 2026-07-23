@@ -2,7 +2,7 @@
 
 A deliberately minimal, mobile-first timetable viewer for **Thursday 30 July 2026**. It presents seven stages in a compact time grid designed primarily for an iPhone Max-sized device in landscape orientation.
 
-The application is display-only: there are no accounts, planning tools, selections, imports, editing controls, databases, or runtime APIs.
+The application has no accounts, planning tools, imports, editing controls, databases, or runtime APIs. Liked sets are stored locally in the browser.
 
 ## Official timetable source
 
@@ -13,6 +13,12 @@ https://letitroll.eu/time/
 The official page provides a semantic HTML table with stage headers and performance cells containing explicit `data-start` and `data-end` values. The local data file preserves those stage relationships and times. The deployed app does not fetch or scrape the official website at runtime.
 
 The timetable may change. Check the official source for the latest information.
+
+The bundled interactive festival map is the official full-resolution 2026 map:
+
+https://letitroll.at/wp-content/uploads/maps/lir26_map.jpg
+
+It is stored locally with the app and is not fetched from the source website at runtime.
 
 ## Current scope
 
@@ -29,10 +35,11 @@ The timetable may change. Check the official source for the latest information.
 - Live or session-only simulated time with a matching timetable cursor
 - Past/current/upcoming performance states based on the active timetable time
 - Timetable-only two-finger zoom from 1× to 2.5× with sticky stage and time headers
-- Session-only performance marking by tapping a set block
+- Persistent set liking through the explicit Like Mode
+- Stage headings open the locally bundled festival map at the selected stage
 - iPhone landscape safe-area insets for the sticky time rail
 
-Landscape orientation is strongly recommended. At common iPhone landscape widths, the time column and all seven stage columns fit without horizontal panning. Portrait orientation displays a rotation recommendation and allows horizontal scrolling as a fallback.
+Landscape orientation is strongly recommended. At common iPhone landscape widths, the time column and all seven stage columns fit without horizontal panning. Portrait orientation allows horizontal scrolling as a fallback.
 
 ## Local setup
 
@@ -56,7 +63,7 @@ The production output is written to `dist`.
 
 ## PWA and iPhone installation
 
-The app includes a basic standalone manifest and offline service worker. After one successful online visit, the application shell and local timetable data are available offline.
+The app includes a basic standalone manifest and offline service worker. After one successful online visit, the application shell, timetable data, and festival map are available offline.
 
 On iPhone, open the deployed page in Safari, tap **Share**, then **Add to Home Screen**. Landscape orientation provides the intended full timetable layout.
 
