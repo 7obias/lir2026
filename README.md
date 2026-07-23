@@ -2,7 +2,7 @@
 
 A deliberately minimal, mobile-first timetable viewer for **Thursday 30 July 2026**. It presents seven stages in a compact time grid designed primarily for an iPhone Max-sized device in landscape orientation.
 
-The application has no accounts, planning tools, imports, editing controls, databases, or runtime APIs. Liked sets are stored locally in the browser.
+The application has no accounts, planning tools, imports, editing controls, databases, or remote runtime APIs. Liked sets are stored locally in the browser.
 
 ## Official timetable source
 
@@ -37,9 +37,16 @@ It is stored locally with the app and is not fetched from the source website at 
 - Timetable-only two-finger zoom from 1× to 2.5× with sticky stage and time headers
 - Persistent set liking through the explicit Like Mode
 - Stage headings open the locally bundled festival map at the selected stage
+- Optional, permission-gated live position and compass direction on the festival map
 - iPhone landscape safe-area insets for the sticky time rail
 
 Landscape orientation is strongly recommended. At common iPhone landscape widths, the time column and all seven stage columns fit without horizontal panning. Portrait orientation allows horizontal scrolling as a fallback.
+
+Stage headings open the locally bundled official festival map. Its optional location
+button requests GPS and compass access only after it is pressed. Position and direction
+are processed only in the browser, are never stored or transmitted, and stop updating
+when the map closes. Because the festival map is an illustration rather than a surveyed
+geographic map, the displayed position and accuracy area are approximate.
 
 ## Local setup
 
