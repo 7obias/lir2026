@@ -1,10 +1,12 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
-import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE, toggleSetMembership } from './timetable'
+import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE } from './timetable'
 import { formatPragueDateTime, pragueLocalInputToDate, useActiveTime, type TimeMode } from './useActiveTime'
+import { useMarkedPerformances } from './useMarkedPerformances'
 import { useTimetableZoom } from './useTimetableZoom'
 
 const totalHeight = minutesFrom(THURSDAY_START, THURSDAY_END) * PIXELS_PER_MINUTE
+const performanceIds = new Set(performances.map(({ id }) => id))
 const guides = Array.from({ length: 27 }, (_, index) => {
   const timestamp = new Date(new Date(THURSDAY_START).getTime() + index * 30 * 60_000).toISOString()
   return { timestamp, top: index * 30 * PIXELS_PER_MINUTE }
@@ -15,7 +17,7 @@ export default function App() {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const timelineBodyRef = useRef<HTMLDivElement>(null)
   const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
-  const [markedPerformanceIds, setMarkedPerformanceIds] = useState<Set<string>>(() => new Set())
+  const marking = useMarkedPerformances(performanceIds, zoom.shouldSuppressClick)
   const { activeTime, timeState, setTimeState, activateLive } = useActiveTime()
   const [draftMode, setDraftMode] = useState<TimeMode>(timeState.mode)
   const [draftDateTime, setDraftDateTime] = useState(timeState.simulatedDateTime ?? '2026-07-30T22:00')
@@ -36,11 +38,6 @@ export default function App() {
     activateLive()
     dialogRef.current?.close()
   }
-  const toggleMarked = (performanceId: string) => {
-    if (zoom.shouldSuppressClick()) return
-    setMarkedPerformanceIds((current) => toggleSetMembership(current, performanceId))
-  }
-
   return (
     <main className="app">
       <header className="compact-header">
@@ -119,7 +116,7 @@ export default function App() {
                   const statusLabel = status === 'current'
                     ? 'Playing now'
                     : status === 'past' ? 'Past performance' : 'Upcoming performance'
-                  const isMarked = markedPerformanceIds.has(performance.id)
+                  const isMarked = marking.markedIds.has(performance.id)
                   return (
                     <button
                       type="button"
@@ -131,7 +128,18 @@ export default function App() {
                       } as CSSProperties}
                       aria-pressed={isMarked}
                       aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}. ${isMarked ? 'Marked' : 'Not marked'}`}
-                      onClick={() => toggleMarked(performance.id)}
+                      onClick={(event) => event.preventDefault()}
+                      onDoubleClick={(event) => event.preventDefault()}
+                      onPointerDown={(event) => marking.onPointerDown(event, performance.id)}
+                      onPointerMove={marking.onPointerMove}
+                      onPointerUp={marking.onPointerUp}
+                      onPointerCancel={marking.onPointerCancel}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          marking.toggleMarked(performance.id)
+                        }
+                      }}
                     >
                       <time>{formatTime(performance.start)}</time>
                       <strong>{performance.artist}</strong>

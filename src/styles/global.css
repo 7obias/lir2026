@@ -259,6 +259,9 @@ body { background: #07080c; overflow-x: hidden }
   text-align: left;
   appearance: none;
   cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .performance--future {
@@ -284,9 +287,14 @@ body { background: #07080c; overflow-x: hidden }
 .performance--past time { color: #979aa3 }
 .performance--past strong { color: #b8bac1 }
 
-.performance--marked {
-  outline: 2px solid #fff0a3;
-  outline-offset: -2px;
+.performance.performance--marked,
+.performance.performance--marked:active {
+  z-index: 4;
+  border-color: #e9eaed;
+  border-left: 3px solid var(--stage-color);
+  background: #f3f4f6;
+  color: #111318;
+  box-shadow: inset 0 0 0 1px #c5c8ce;
 }
 
 .performance--marked::after {
@@ -297,9 +305,12 @@ body { background: #07080c; overflow-x: hidden }
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #fff0a3;
-  box-shadow: 0 0 0 1px #27230f;
+  background: var(--stage-color);
+  box-shadow: 0 0 0 1px #f3f4f6;
 }
+
+.performance.performance--marked time,
+.performance.performance--marked strong { color: #111318 }
 
 .performance:focus-visible {
   outline: 2px solid #fff;
@@ -403,6 +414,21 @@ footer {
   .header-title strong { font-size: 10px }
   .build-id { font-size: 6px }
   .time-control-button { font-size: 8px }
+}
+
+@media (prefers-color-scheme: light) {
+  .performance.performance--marked,
+  .performance.performance--marked:active {
+    border-color: #252830;
+    border-left-color: var(--stage-color);
+    background: #17191f;
+    color: #f5f6f8;
+    box-shadow: inset 0 0 0 1px #343740;
+  }
+
+  .performance.performance--marked time,
+  .performance.performance--marked strong { color: #f5f6f8 }
+  .performance--marked::after { box-shadow: 0 0 0 1px #17191f }
 }
 
 @media (prefers-reduced-motion: reduce) {
