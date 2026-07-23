@@ -45,8 +45,36 @@ Landscape orientation is strongly recommended. At common iPhone landscape widths
 Stage headings open the locally bundled official festival map. Its optional location
 button requests GPS and compass access only after it is pressed. Position and direction
 are processed only in the browser, are never stored or transmitted, and stop updating
-when the map closes. Because the festival map is an illustration rather than a surveyed
-geographic map, the displayed position and accuracy area are approximate.
+when the map closes.
+
+The illustrated map has no authoritative geographic coordinate system and the app
+ships with **no guessed calibration points**. Real GPS placement remains unavailable
+until field calibration has supplied at least two active points; two points are clearly
+marked provisional, while three or more well-separated points use a local-metre affine
+fit. The interface never claims surveyed or centimetre-level accuracy.
+
+## Field map calibration
+
+Calibration editing is an administrator/development tool, not an ordinary festival-user
+control. It appears automatically during local Vite development. In a production build,
+open the map from a stage and add `?mapCalibration=1` to the application URL to expose
+the **Calibrate map** control.
+
+The field workflow is:
+
+1. Stand at an identifiable landmark and choose **Use my current position**.
+2. Wait while several high-accuracy GPS samples are stabilized for at least five seconds.
+3. Accept the reading, then tap the corresponding point on the illustrated map.
+4. Repeat at three or more widely separated landmarks (four or more are recommended).
+5. Review recorded-versus-predicted markers, residual errors, and flagged outliers.
+6. Drag points to fine-tune them, replace GPS readings, exclude or delete bad points,
+   and export the verified JSON.
+
+Calibration is stored separately in local storage under
+`lir2026.map-calibration.v1`. It can be exported and imported as JSON; only reviewed,
+field-verified points should later be committed to
+`src/data/festivalMapCalibration.ts`. Resetting all points requires confirmation.
+GPS simulation is a separate visual test mode and never creates calibration points.
 
 ## Local setup
 

@@ -1,6 +1,10 @@
-import { useEffect, useRef, type CSSProperties, type MouseEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react'
 import type { MapStageLocation } from './data/mapStageLocations'
 import { useLiveMapPosition } from './useLiveMapPosition'
+import { calibrationAdminEnabled, useMapCalibration } from './useMapCalibration'
+import { MapCalibrationPanel } from './MapCalibrationPanel'
+import type { StabilizedGpsReading } from './useCalibrationGps'
+import type { MapPoint } from './festivalMapGeo'
 
 type FestivalMapProps = {
   location?: MapStageLocation
@@ -11,7 +15,15 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
-  const tracking = useLiveMapPosition(Boolean(location))
+  const calibration = useMapCalibration()
+  const tracking = useLiveMapPosition(Boolean(location), calibration.transform)
+  const [calibrationOpen, setCalibrationOpen] = useState(false)
+  const [pendingReading, setPendingReading] = useState<(StabilizedGpsReading & { label: string })>()
+  const [simulationActive, setSimulationActive] = useState(false)
+  const [simulatedPosition, setSimulatedPosition] = useState<MapPoint>()
+  const mapTapRef = useRef<{ x: number; y: number; moved: boolean } | undefined>(undefined)
+  const dragRef = useRef<{ id: string } | undefined>(undefined)
+  const adminEnabled = calibrationAdminEnabled()
 
   const centreStage = () => {
     const viewport = viewportRef.current
@@ -37,6 +49,78 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
     if (event.target === event.currentTarget) close()
   }
 
+  const mapPercent = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current
+    if (!canvas) return undefined
+    const bounds = canvas.getBoundingClientRect()
+    return {
+      xPercent: Math.max(0, Math.min(100, (clientX - bounds.left) / bounds.width * 100)),
+      yPercent: Math.max(0, Math.min(100, (clientY - bounds.top) / bounds.height * 100)),
+    }
+  }
+
+  const onMapPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if ((!pendingReading && !simulationActive) || event.button !== 0) return
+    mapTapRef.current = { x: event.clientX, y: event.clientY, moved: false }
+  }
+
+  const onMapPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const start = mapTapRef.current
+    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) start.moved = true
+  }
+
+  const onMapPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const start = mapTapRef.current
+    mapTapRef.current = undefined
+    if (!start || start.moved) return
+    const point = mapPercent(event.clientX, event.clientY)
+    if (!point) return
+    if (pendingReading) {
+      calibration.addPoint({
+        id: crypto.randomUUID(),
+        latitude: pendingReading.latitude,
+        longitude: pendingReading.longitude,
+        accuracyMeters: pendingReading.accuracyMeters,
+        ...point,
+        label: pendingReading.label || undefined,
+        createdAt: new Date().toISOString(),
+      })
+      setPendingReading(undefined)
+    } else if (simulationActive) {
+      setSimulatedPosition(point)
+    }
+  }
+
+  const startMarkerDrag = (event: PointerEvent<HTMLButtonElement>, id: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+    calibration.checkpoint()
+    dragRef.current = { id }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const moveMarker = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!dragRef.current) return
+    const point = mapPercent(event.clientX, event.clientY)
+    if (point) calibration.patchPoint(dragRef.current.id, point, false)
+  }
+
+  const finishMarkerDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!dragRef.current) return
+    event.preventDefault()
+    event.stopPropagation()
+    dragRef.current = undefined
+  }
+
+  const displayedPosition = simulatedPosition
+    ? {
+        ...simulatedPosition,
+        accuracyWidthPercent: 1.4,
+        accuracyHeightPercent: 1.4,
+        heading: 0,
+      }
+    : tracking.position
+
   return (
     <dialog
       className="map-dialog"
@@ -52,13 +136,30 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             {location && <span>{location.mapLabel}</span>}
           </div>
           <div className="map-toolbar-actions">
+            {adminEnabled && (
+              <button
+                type="button"
+                className={`map-calibrate-button${calibrationOpen ? ' map-calibrate-button--active' : ''}`}
+                aria-pressed={calibrationOpen}
+                onClick={() => setCalibrationOpen((current) => !current)}
+              >
+                Calibrate map
+              </button>
+            )}
             <button
               type="button"
               className={`map-location-button map-location-button--${tracking.status}`}
               aria-label={tracking.status === 'active' ? 'Hide my position' : 'Show my position'}
               aria-pressed={tracking.status === 'active'}
               title={tracking.status === 'active' ? 'Hide my position' : 'Show my position'}
-              onClick={tracking.status === 'active' || tracking.status === 'acquiring' ? tracking.stop : tracking.start}
+              onClick={() => {
+                if (tracking.status === 'active' || tracking.status === 'acquiring') tracking.stop()
+                else {
+                  setSimulationActive(false)
+                  setSimulatedPosition(undefined)
+                  tracking.start()
+                }
+              }}
             >
               <svg aria-hidden="true" viewBox="0 0 24 24">
                 <path d="M20.4 3.6 14 20.2l-2.8-7.4-7.4-2.8 16.6-6.4Z" />
@@ -69,9 +170,27 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             <button type="button" aria-label="Close festival map" onClick={close}>×</button>
           </div>
         </header>
+        {!calibration.transform && (
+          <p className="map-calibration-unavailable" role="status">
+            Map not sufficiently calibrated · real position display unavailable
+          </p>
+        )}
+        {calibration.quality.model === 'similarity' && (
+          <p className="map-calibration-unavailable" role="status">
+            Provisional two-point calibration · position is approximate
+          </p>
+        )}
+        {simulationActive && <p className="map-simulation-badge">SIMULATED GPS · tap map to move</p>}
         {tracking.message && <p className="map-location-message" role="status">{tracking.message}</p>}
         <div className="map-viewport" ref={viewportRef}>
-          <div className="map-canvas" ref={canvasRef}>
+          <div
+            className={`map-canvas${pendingReading || simulationActive ? ' map-canvas--placing' : ''}`}
+            ref={canvasRef}
+            onPointerDown={onMapPointerDown}
+            onPointerMove={onMapPointerMove}
+            onPointerUp={onMapPointerUp}
+            onPointerCancel={() => { mapTapRef.current = undefined }}
+          >
             <img
               src={`${import.meta.env.BASE_URL}maps/lir26-map.jpg`}
               alt="Official Let It Roll 2026 festival map"
@@ -92,27 +211,74 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
                 <span>{location.mapLabel}</span>
               </span>
             )}
-            {tracking.position && (
+            {calibrationOpen && (
+              <>
+                <svg className="map-calibration-verification" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                  {calibration.transform?.residuals.map((residual) => {
+                    const point = calibration.points.find(({ id }) => id === residual.id)
+                    if (!point) return null
+                    return (
+                      <line
+                        key={residual.id}
+                        x1={point.xPercent}
+                        y1={point.yPercent}
+                        x2={residual.predicted.xPercent}
+                        y2={residual.predicted.yPercent}
+                      />
+                    )
+                  })}
+                </svg>
+                {calibration.points.map((point, index) => {
+                  const predicted = calibration.transform?.residuals.find(({ id }) => id === point.id)?.predicted
+                  return (
+                    <span key={point.id}>
+                      {predicted && (
+                        <span
+                          className="map-calibration-predicted"
+                          style={{ left: `${predicted.xPercent}%`, top: `${predicted.yPercent}%` }}
+                          title="Position predicted by the calibration model"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        className={`map-calibration-marker${point.excluded ? ' map-calibration-marker--excluded' : ''}`}
+                        style={{ left: `${point.xPercent}%`, top: `${point.yPercent}%` }}
+                        aria-label={`Calibration point ${index + 1}${point.label ? `: ${point.label}` : ''}. Drag to adjust map position.`}
+                        onPointerDown={(event) => startMarkerDrag(event, point.id)}
+                        onPointerMove={moveMarker}
+                        onPointerUp={finishMarkerDrag}
+                        onPointerCancel={finishMarkerDrag}
+                      >
+                        {index + 1}
+                      </button>
+                    </span>
+                  )
+                })}
+              </>
+            )}
+            {displayedPosition && (
               <div
                 className="map-user-location"
                 style={{
-                  '--user-x': `${tracking.position.xPercent}%`,
-                  '--user-y': `${tracking.position.yPercent}%`,
+                  '--user-x': `${displayedPosition.xPercent}%`,
+                  '--user-y': `${displayedPosition.yPercent}%`,
                 } as CSSProperties}
                 role="status"
-                aria-label={`Your approximate position${tracking.position.heading === undefined ? ', direction unavailable' : ''}`}
+                aria-label={simulatedPosition
+                  ? 'Simulated GPS position'
+                  : `Your approximate position${displayedPosition.heading === undefined ? ', direction unavailable' : ''}`}
               >
                 <span
                   className="map-user-accuracy"
                   style={{
-                    width: `${tracking.position.accuracyWidthPercent}%`,
-                    height: `${tracking.position.accuracyHeightPercent}%`,
+                    width: `${displayedPosition.accuracyWidthPercent}%`,
+                    height: `${displayedPosition.accuracyHeightPercent}%`,
                   }}
                 />
-                {tracking.position.heading !== undefined && (
+                {displayedPosition.heading !== undefined && (
                   <span
                     className="map-user-direction"
-                    style={{ transform: `translate(-50%, -100%) rotate(${tracking.position.heading}deg)` }}
+                    style={{ transform: `translate(-50%, -100%) rotate(${displayedPosition.heading}deg)` }}
                   />
                 )}
                 <span className="map-user-dot" />
@@ -120,6 +286,45 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             )}
           </div>
         </div>
+        {calibrationOpen && (
+          <MapCalibrationPanel
+            points={calibration.points}
+            transform={calibration.transform}
+            quality={calibration.quality}
+            storageMessage={calibration.storageMessage}
+            canUndo={calibration.canUndo}
+            awaitingMapPoint={Boolean(pendingReading)}
+            simulationActive={simulationActive}
+            onCaptureAccepted={(reading, label) => setPendingReading({ ...reading, label })}
+            onReplaceReading={(id, reading) => calibration.patchPoint(id, {
+              latitude: reading.latitude,
+              longitude: reading.longitude,
+              accuracyMeters: reading.accuracyMeters,
+              createdAt: new Date().toISOString(),
+            })}
+            onCancelMapPoint={() => setPendingReading(undefined)}
+            onPatchPoint={calibration.patchPoint}
+            onDeletePoint={calibration.deletePoint}
+            onUndo={calibration.undo}
+            onReset={() => {
+              calibration.reset()
+              setPendingReading(undefined)
+            }}
+            onExport={calibration.exportJson}
+            onImport={calibration.importJson}
+            onToggleSimulation={() => {
+              setSimulationActive((current) => {
+                if (current) setSimulatedPosition(undefined)
+                else tracking.stop()
+                return !current
+              })
+            }}
+            onClose={() => {
+              setCalibrationOpen(false)
+              setPendingReading(undefined)
+            }}
+          />
+        )}
       </section>
     </dialog>
   )

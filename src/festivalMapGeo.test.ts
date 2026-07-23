@@ -1,26 +1,71 @@
 import { describe, expect, it } from 'vitest'
-import { festivalMapControlPoints } from './data/festivalMapCalibration'
+import type { FestivalMapCalibrationPoint } from './data/festivalMapCalibration'
 import {
   accuracyEllipse,
-  createMapProjection,
+  calculateFestivalMapTransform,
+  calibrationQuality,
   smoothCoordinates,
   smoothHeading,
 } from './festivalMapGeo'
 
+const point = (
+  id: string,
+  latitude: number,
+  longitude: number,
+  xPercent: number,
+  yPercent: number,
+): FestivalMapCalibrationPoint => ({
+  id,
+  latitude,
+  longitude,
+  accuracyMeters: 5,
+  xPercent,
+  yPercent,
+  createdAt: '2026-07-23T12:00:00.000Z',
+})
+
+const points = [
+  point('north-west', 50.530, 13.640, 20, 18),
+  point('north-east', 50.530, 13.680, 82, 22),
+  point('south-west', 50.510, 13.640, 17, 86),
+  point('south-east', 50.510, 13.680, 79, 90),
+]
+
 describe('festival map calibration', () => {
-  it('maps every calibration coordinate back to its measured image point', () => {
-    const project = createMapProjection(festivalMapControlPoints)
-    for (const point of festivalMapControlPoints) {
-      expect(project(point.latitude, point.longitude)).toEqual({
-        xPercent: expect.closeTo(point.xPercent, 5),
-        yPercent: expect.closeTo(point.yPercent, 5),
-      })
-    }
+  it('does not produce a transform with fewer than two points', () => {
+    expect(calculateFestivalMapTransform([])).toBeUndefined()
+    expect(calculateFestivalMapTransform(points.slice(0, 1))).toBeUndefined()
   })
 
-  it('converts GPS accuracy to a visible positive map ellipse', () => {
-    const project = createMapProjection(festivalMapControlPoints)
-    const ellipse = accuracyEllipse(project, 50.525, 13.66, 10)
+  it('uses a provisional similarity transform for two points', () => {
+    const transform = calculateFestivalMapTransform(points.slice(0, 2))
+    expect(transform?.model).toBe('similarity')
+    expect(transform?.project(points[0].latitude, points[0].longitude)).toEqual({
+      xPercent: expect.closeTo(points[0].xPercent, 5),
+      yPercent: expect.closeTo(points[0].yPercent, 5),
+    })
+    expect(calibrationQuality(points.slice(0, 2), transform).status).toBe('Provisional')
+  })
+
+  it('least-squares fits four well-separated points with an affine transform', () => {
+    const transform = calculateFestivalMapTransform(points)
+    expect(transform?.model).toBe('affine')
+    expect(transform?.averageErrorMeters).toBeLessThan(0.1)
+    expect(transform?.residuals).toHaveLength(4)
+  })
+
+  it('ignores excluded points', () => {
+    const transform = calculateFestivalMapTransform([
+      ...points,
+      { ...point('bad', 50.52, 13.66, 99, 1), excluded: true },
+    ])
+    expect(transform?.residuals).toHaveLength(4)
+  })
+
+  it('converts GPS accuracy to a positive map ellipse', () => {
+    const transform = calculateFestivalMapTransform(points)
+    expect(transform).toBeDefined()
+    const ellipse = accuracyEllipse(transform!.project, 50.52, 13.66, 10)
     expect(ellipse.widthPercent).toBeGreaterThan(0)
     expect(ellipse.heightPercent).toBeGreaterThan(0)
   })

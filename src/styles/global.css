@@ -489,6 +489,7 @@ footer {
 .map-dialog::backdrop { background: rgb(0 0 0 / .86) }
 
 .map-panel {
+  position: relative;
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -541,6 +542,19 @@ footer {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.map-toolbar .map-calibrate-button {
+  width: auto;
+  padding: 0 7px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.map-toolbar .map-calibrate-button--active {
+  border-color: #e8c85d;
+  color: #111;
+  background: #e8c85d;
 }
 
 .map-toolbar .map-location-button {
@@ -610,6 +624,33 @@ footer {
   pointer-events: none;
 }
 
+.map-calibration-unavailable,
+.map-simulation-badge {
+  top: 57px;
+  position: absolute;
+  z-index: 6;
+  top: 40px;
+  left: max(10px, env(safe-area-inset-left));
+  max-width: min(310px, 66vw);
+  margin: 0;
+  padding: 3px 6px;
+  border: 1px solid #725735;
+  border-radius: 2px;
+  color: #f0d4a7;
+  background: rgb(25 20 14 / .92);
+  font-size: 8px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.map-simulation-badge {
+  border-color: #a453cc;
+  color: #f4d8ff;
+  background: rgb(42 15 54 / .94);
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
 .map-viewport {
   min-width: 0;
   min-height: 0;
@@ -624,6 +665,8 @@ footer {
   width: max(220%, 1800px);
   aspect-ratio: 10000 / 5625;
 }
+
+.map-canvas--placing { cursor: crosshair }
 
 .map-canvas img {
   display: block;
@@ -706,6 +749,177 @@ footer {
   box-shadow: 0 0 0 2px #003b72, 0 1px 5px #000;
 }
 
+.map-calibration-verification {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.map-calibration-verification line {
+  vector-effect: non-scaling-stroke;
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+  filter: drop-shadow(0 0 1px #000);
+}
+
+.map-calibration-predicted {
+  position: absolute;
+  z-index: 6;
+  width: 11px;
+  height: 11px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #111;
+  box-shadow: 0 0 0 1px #000;
+  pointer-events: none;
+}
+
+.map-calibration-marker {
+  position: absolute;
+  z-index: 7;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 2px solid #111;
+  border-radius: 50%;
+  color: #111;
+  background: #ffe15a;
+  box-shadow: 0 0 0 2px #fff, 0 2px 4px #000;
+  font: 800 10px/1 Arial, sans-serif;
+  touch-action: none;
+  user-select: none;
+}
+
+.map-calibration-marker--excluded {
+  opacity: .58;
+  background: #aaa;
+  text-decoration: line-through;
+}
+
+.calibration-panel {
+  position: absolute;
+  z-index: 20;
+  top: 35px;
+  right: 0;
+  bottom: 0;
+  width: min(330px, 88vw);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 7px;
+  border-left: 1px solid #555a66;
+  color: #f1f2f5;
+  background: rgb(14 16 21 / .97);
+  box-shadow: -4px 0 12px rgb(0 0 0 / .5);
+  font-size: 9px;
+}
+
+.calibration-panel > header {
+  position: sticky;
+  z-index: 2;
+  top: -7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -7px -7px 7px;
+  padding: 5px 7px;
+  border-bottom: 1px solid #3b3f49;
+  background: #171920;
+}
+
+.calibration-panel > header strong { font-size: 12px }
+.calibration-panel button,
+.calibration-panel input {
+  min-height: 28px;
+  border: 1px solid #454a56;
+  border-radius: 3px;
+  color: inherit;
+  background: #242731;
+  font: inherit;
+}
+
+.calibration-panel button { padding: 3px 6px }
+.calibration-panel button:disabled { opacity: .4 }
+.calibration-panel input { min-width: 0; padding: 3px 5px; background: #0d0f14 }
+.calibration-panel label { display: grid; gap: 3px; color: #bdc0c8 }
+.calibration-panel .calibration-primary { border-color: #58bcd1; background: #225b67 }
+
+.calibration-quality,
+.gps-sampling,
+.calibration-map-prompt {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 7px;
+  padding: 6px;
+  border: 1px solid #383c46;
+  background: #1a1d24;
+}
+
+.calibration-quality > b { color: #e8c85d; font-size: 11px }
+.calibration-quality small { color: #a9adb7; line-height: 1.3 }
+.calibration-quality em,
+.calibration-point--suspect em { color: #ffae72; font-style: normal }
+
+.calibration-quality dl,
+.gps-sampling dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin: 0;
+}
+
+.calibration-quality dl div,
+.gps-sampling dl div { min-width: 0 }
+.calibration-quality dt,
+.gps-sampling dt { color: #9296a0; font-size: 7px }
+.calibration-quality dd,
+.gps-sampling dd { margin: 1px 0 0; font-variant-numeric: tabular-nums }
+.gps-sampling dl { grid-template-columns: repeat(2, 1fr) }
+.gps-sampling .poor { color: #ff9e68; font-weight: 700 }
+.gps-sampling p { margin: 0; color: #c2c5cd }
+
+.calibration-capture { display: grid; gap: 5px; margin-bottom: 7px }
+.calibration-actions,
+.calibration-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.calibration-tools { margin-bottom: 7px }
+.calibration-error { color: #ffae86 }
+.calibration-error button { min-height: 22px }
+.calibration-map-prompt { border-color: #d3b345; background: #332d16 }
+.calibration-map-prompt span { color: #e7dcae }
+
+.calibration-points {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calibration-points li {
+  display: grid;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid #383c46;
+  background: #181b21;
+}
+
+.calibration-points li > span { color: #aeb2bb }
+.calibration-points li > div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px }
+.calibration-points li > div label { display: flex; grid-template-columns: auto auto; align-items: center }
+.calibration-points input[type="checkbox"] { min-height: 0 }
+.calibration-point--suspect { border-color: #aa5d35 !important }
+
 @keyframes map-location-spin {
   to { transform: rotate(360deg) }
 }
@@ -713,4 +927,11 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important }
   .map-location-spinner { animation-duration: 1.8s }
+}
+
+@media (orientation: landscape) and (max-height: 450px) {
+  .calibration-panel {
+    top: 33px;
+    width: min(390px, 53vw);
+  }
 }

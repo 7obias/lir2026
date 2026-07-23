@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { festivalMapControlPoints } from './data/festivalMapCalibration'
 import {
   accuracyEllipse,
-  createMapProjection,
   normalizeHeading,
   smoothCoordinates,
   smoothHeading,
+  type FestivalMapTransform,
   type MapPoint,
 } from './festivalMapGeo'
 
@@ -26,14 +25,12 @@ export type LiveMapPosition = MapPoint & {
   heading?: number
 }
 
-const project = createMapProjection(festivalMapControlPoints)
-
 const screenAngle = () => {
   const legacyWindow = window as Window & { orientation?: number }
   return window.screen.orientation?.angle ?? legacyWindow.orientation ?? 0
 }
 
-export function useLiveMapPosition(active: boolean) {
+export function useLiveMapPosition(active: boolean, transform?: FestivalMapTransform) {
   const [status, setStatus] = useState<TrackingStatus>('inactive')
   const [position, setPosition] = useState<LiveMapPosition>()
   const [message, setMessage] = useState('')
@@ -74,6 +71,11 @@ export function useLiveMapPosition(active: boolean) {
 
   const start = useCallback(() => {
     if (!active || status === 'acquiring' || status === 'active') return
+    if (!transform) {
+      setStatus('error')
+      setMessage('Map not sufficiently calibrated')
+      return
+    }
     setStatus('acquiring')
     setMessage('Finding your position…')
 
@@ -101,8 +103,8 @@ export function useLiveMapPosition(active: boolean) {
       ({ coords }) => {
         const smoothed = smoothCoordinates(coordinatesRef.current, coords)
         coordinatesRef.current = smoothed
-        const point = project(smoothed.latitude, smoothed.longitude)
-        const accuracy = accuracyEllipse(project, smoothed.latitude, smoothed.longitude, coords.accuracy)
+        const point = transform.project(smoothed.latitude, smoothed.longitude)
+        const accuracy = accuracyEllipse(transform.project, smoothed.latitude, smoothed.longitude, coords.accuracy)
         setPosition({
           ...point,
           accuracyWidthPercent: accuracy.widthPercent,
@@ -122,12 +124,16 @@ export function useLiveMapPosition(active: boolean) {
       },
       { enableHighAccuracy: true, maximumAge: 3_000, timeout: 15_000 },
     )
-  }, [active, onOrientation, status])
+  }, [active, onOrientation, status, transform])
 
   useEffect(() => {
     if (!active) stop()
     return stop
   }, [active, stop])
+
+  useEffect(() => {
+    if (!transform && (status === 'active' || status === 'acquiring')) stop()
+  }, [status, stop, transform])
 
   return { status, position, message, start, stop }
 }
