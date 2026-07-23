@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { advanceTapSequence, readMarkedPerformanceIds, type TapSequence } from './useMarkedPerformances'
 
-const tap = (time: number, performanceId = 'set-1', x = 20, y = 30) => ({
+const tap = (time: number, performanceId = 'set-1', x = 20, y = 30, pointerType = 'touch') => ({
   performanceId,
+  pointerType,
   time,
   x,
   y,
@@ -27,6 +28,7 @@ describe('triple-tap marking', () => {
     expect(advanceTapSequence(first, tap(200, 'set-2')).next?.count).toBe(1)
     expect(advanceTapSequence(first, tap(900)).next?.count).toBe(1)
     expect(advanceTapSequence(first, tap(200, 'set-1', 100)).next?.count).toBe(1)
+    expect(advanceTapSequence(first, tap(200, 'set-1', 20, 30, 'mouse')).next?.count).toBe(1)
   })
 })
 

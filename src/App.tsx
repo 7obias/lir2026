@@ -67,7 +67,15 @@ export default function App() {
               '--timetable-width': `${zoom.scale * 100}%`,
               '--timeline-height': `${totalHeight * zoom.scale}px`,
               '--portrait-min-width': `${810 * zoom.scale}px`,
-              '--performance-font-size': `${Math.min(15, Math.max(7, 8 * zoom.scale))}px`,
+              '--performance-font-size': `${8 * zoom.scale}px`,
+              '--performance-time-font-size': `${7 * zoom.scale}px`,
+              '--performance-padding': `${2 * zoom.scale}px`,
+              '--performance-spacing': `${zoom.scale}px`,
+              '--performance-accent-width': `${2 * zoom.scale}px`,
+              '--marked-accent-width': `${3 * zoom.scale}px`,
+              '--marked-dot-size': `${5 * zoom.scale}px`,
+              '--tap-diagnostic-size': `${13 * zoom.scale}px`,
+              '--tap-diagnostic-font-size': `${8 * zoom.scale}px`,
             } as CSSProperties}
           >
           <div className="stage-row">
@@ -117,6 +125,9 @@ export default function App() {
                     ? 'Playing now'
                     : status === 'past' ? 'Past performance' : 'Upcoming performance'
                   const isMarked = marking.markedIds.has(performance.id)
+                  const tapCount = marking.tapFeedback?.performanceId === performance.id
+                    ? marking.tapFeedback.count
+                    : undefined
                   return (
                     <button
                       type="button"
@@ -128,8 +139,6 @@ export default function App() {
                       } as CSSProperties}
                       aria-pressed={isMarked}
                       aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}. ${isMarked ? 'Marked' : 'Not marked'}`}
-                      onClick={(event) => event.preventDefault()}
-                      onDoubleClick={(event) => event.preventDefault()}
                       onPointerDown={(event) => marking.onPointerDown(event, performance.id)}
                       onPointerMove={marking.onPointerMove}
                       onPointerUp={marking.onPointerUp}
@@ -141,9 +150,12 @@ export default function App() {
                         }
                       }}
                     >
-                      <time>{formatTime(performance.start)}</time>
-                      <strong>{performance.artist}</strong>
-                      <span className="visually-hidden">{statusLabel}</span>
+                      <span className="performance-content">
+                        <time>{formatTime(performance.start)}</time>
+                        <strong>{performance.artist}</strong>
+                        <span className="visually-hidden">{statusLabel}</span>
+                      </span>
+                      {tapCount && <span className="tap-diagnostic" aria-hidden="true">{tapCount}</span>}
                     </button>
                   )
                 })}
