@@ -62,16 +62,17 @@ export default function App() {
           {formatPragueDateTime(activeTime)}
         </button>
       </header>
-      <div className="timetable-scroll" aria-label="Thursday timetable" ref={scrollerRef}>
-        <div
-          className="timetable"
-          style={{
-            '--timetable-width': `${zoom.scale * 100}%`,
-            '--timeline-height': `${totalHeight * zoom.scale}px`,
-            '--portrait-min-width': `${810 * zoom.scale}px`,
-            '--performance-font-size': `${Math.min(15, Math.max(7, 8 * zoom.scale))}px`,
-          } as CSSProperties}
-        >
+      <div className="safe-area-content">
+        <div className="timetable-scroll" aria-label="Thursday timetable" ref={scrollerRef}>
+          <div
+            className="timetable"
+            style={{
+              '--timetable-width': `${zoom.scale * 100}%`,
+              '--timeline-height': `${totalHeight * zoom.scale}px`,
+              '--portrait-min-width': `${810 * zoom.scale}px`,
+              '--performance-font-size': `${Math.min(15, Math.max(7, 8 * zoom.scale))}px`,
+            } as CSSProperties}
+          >
           <div className="stage-row">
             <div className="time-heading">TIME</div>
             {stages.map((stage) => (
@@ -142,6 +143,7 @@ export default function App() {
             ))}
           </div>
         </div>
+      </div>
       </div>
       <footer>Timetable data sourced from the official Let It Roll 2026 timetable. Schedule may change.</footer>
       <dialog className="time-dialog" ref={dialogRef}>
