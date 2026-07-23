@@ -2,7 +2,7 @@ import { useRef, useState, type CSSProperties } from 'react'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
 import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE } from './timetable'
 import { formatPragueDateTime, pragueLocalInputToDate, useActiveTime, type TimeMode } from './useActiveTime'
-import { useMarkedPerformances } from './useMarkedPerformances'
+import { useLikedPerformances } from './useLikedPerformances'
 import { useTimetableZoom } from './useTimetableZoom'
 
 const totalHeight = minutesFrom(THURSDAY_START, THURSDAY_END) * PIXELS_PER_MINUTE
@@ -17,7 +17,7 @@ export default function App() {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const timelineBodyRef = useRef<HTMLDivElement>(null)
   const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
-  const marking = useMarkedPerformances(performanceIds, zoom.shouldSuppressClick)
+  const liking = useLikedPerformances(performanceIds, zoom.shouldSuppressClick)
   const { activeTime, timeState, setTimeState, activateLive } = useActiveTime()
   const [draftMode, setDraftMode] = useState<TimeMode>(timeState.mode)
   const [draftDateTime, setDraftDateTime] = useState(timeState.simulatedDateTime ?? '2026-07-30T22:00')
@@ -39,7 +39,7 @@ export default function App() {
     dialogRef.current?.close()
   }
   return (
-    <main className="app">
+    <main className={`app${liking.likeMode ? ' app--like-mode' : ''}`}>
       <header className="compact-header">
         <div className="brand-mark">
           <img className="header-logo" src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" />
@@ -54,6 +54,15 @@ export default function App() {
           <strong>Let It Roll 2026</strong>
           <span>Thursday 30 July</span>
         </div>
+        <button
+          className={`like-mode-button${liking.likeMode ? ' like-mode-button--active' : ''}`}
+          type="button"
+          aria-label={liking.likeMode ? 'Exit Like Mode' : 'Enter Like Mode'}
+          aria-pressed={liking.likeMode}
+          onClick={liking.toggleLikeMode}
+        >
+          <span aria-hidden="true">{liking.likeMode ? '♥' : '♡'}</span>
+        </button>
         <button className="time-control-button" type="button" aria-label="Open time controls" onClick={openTimeControls}>
           {timeState.mode === 'simulated' && <b>SIM · </b>}
           {formatPragueDateTime(activeTime)}
@@ -72,10 +81,8 @@ export default function App() {
               '--performance-padding': `${2 * zoom.scale}px`,
               '--performance-spacing': `${zoom.scale}px`,
               '--performance-accent-width': `${2 * zoom.scale}px`,
-              '--marked-accent-width': `${3 * zoom.scale}px`,
-              '--marked-dot-size': `${5 * zoom.scale}px`,
-              '--tap-diagnostic-size': `${13 * zoom.scale}px`,
-              '--tap-diagnostic-font-size': `${8 * zoom.scale}px`,
+              '--liked-accent-width': `${3 * zoom.scale}px`,
+              '--liked-dot-size': `${5 * zoom.scale}px`,
             } as CSSProperties}
           >
           <div className="stage-row">
@@ -124,29 +131,27 @@ export default function App() {
                   const statusLabel = status === 'current'
                     ? 'Playing now'
                     : status === 'past' ? 'Past performance' : 'Upcoming performance'
-                  const isMarked = marking.markedIds.has(performance.id)
-                  const tapCount = marking.tapFeedback?.performanceId === performance.id
-                    ? marking.tapFeedback.count
-                    : undefined
+                  const isLiked = liking.likedIds.has(performance.id)
                   return (
                     <button
                       type="button"
-                      className={`performance performance--${status}${isMarked ? ' performance--marked' : ''}`}
+                      className={`performance performance--${status}${isLiked ? ' performance--liked' : ''}`}
                       key={performance.id}
+                      data-performance-id={performance.id}
                       style={{
                         top: position.top * zoom.scale,
                         height: position.height * zoom.scale,
                       } as CSSProperties}
-                      aria-pressed={isMarked}
-                      aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}. ${isMarked ? 'Marked' : 'Not marked'}`}
-                      onPointerDown={(event) => marking.onPointerDown(event, performance.id)}
-                      onPointerMove={marking.onPointerMove}
-                      onPointerUp={marking.onPointerUp}
-                      onPointerCancel={marking.onPointerCancel}
+                      aria-pressed={isLiked}
+                      aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}. ${isLiked ? 'Liked' : 'Not liked'}`}
+                      onPointerDown={(event) => liking.onPointerDown(event, performance.id)}
+                      onPointerMove={liking.onPointerMove}
+                      onPointerUp={liking.onPointerUp}
+                      onPointerCancel={liking.onPointerCancel}
                       onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
+                        if (liking.likeMode && (event.key === 'Enter' || event.key === ' ')) {
                           event.preventDefault()
-                          marking.toggleMarked(performance.id)
+                          liking.toggleLiked(performance.id)
                         }
                       }}
                     >
@@ -155,7 +160,6 @@ export default function App() {
                         <strong>{performance.artist}</strong>
                         <span className="visually-hidden">{statusLabel}</span>
                       </span>
-                      {tapCount && <span className="tap-diagnostic" aria-hidden="true">{tapCount}</span>}
                     </button>
                   )
                 })}

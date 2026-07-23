@@ -72,7 +72,7 @@ body { background: #07080c; overflow-x: hidden }
 
 .time-control-button {
   min-height: 26px;
-  margin-left: auto;
+  margin-left: 0;
   padding: 3px 6px;
   border: 1px solid #343844;
   border-radius: 3px;
@@ -83,7 +83,30 @@ body { background: #07080c; overflow-x: hidden }
   white-space: nowrap;
 }
 
+.like-mode-button {
+  flex: 0 0 auto;
+  width: 28px;
+  min-height: 26px;
+  margin-left: auto;
+  padding: 1px;
+  border: 1px solid #343844;
+  border-radius: 3px;
+  color: #d5d7dd;
+  background: #171a22;
+  font: inherit;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.like-mode-button--active {
+  border-color: #f08ba4;
+  color: #ff7797;
+  background: #47202c;
+  box-shadow: inset 0 0 0 1px #7c3548;
+}
+
 .time-control-button b { color: #e8c85d; font-size: 8px }
+.like-mode-button:focus-visible,
 .time-control-button:focus-visible,
 .time-dialog button:focus-visible,
 .time-dialog input:focus-visible { outline: 2px solid #6ed5e9; outline-offset: 1px }
@@ -258,7 +281,7 @@ body { background: #07080c; overflow-x: hidden }
   font: inherit;
   text-align: left;
   appearance: none;
-  cursor: pointer;
+  cursor: default;
   touch-action: manipulation;
   user-select: none;
   -webkit-touch-callout: none;
@@ -287,53 +310,34 @@ body { background: #07080c; overflow-x: hidden }
 .performance--past time { color: #979aa3 }
 .performance--past strong { color: #b8bac1 }
 
-.performance.performance--marked,
-.performance.performance--marked:active {
+.performance.performance--liked,
+.performance.performance--liked:active {
   z-index: 4;
   border-color: #e9eaed;
-  border-left: var(--marked-accent-width) solid var(--stage-color);
+  border-left: var(--liked-accent-width) solid var(--stage-color);
   background: #f3f4f6;
   color: #111318;
   box-shadow: inset 0 0 0 1px #c5c8ce;
 }
 
-.performance--marked::after {
+.performance--liked::after {
   content: "";
   position: absolute;
   top: var(--performance-padding);
   right: var(--performance-padding);
-  width: var(--marked-dot-size);
-  height: var(--marked-dot-size);
+  width: var(--liked-dot-size);
+  height: var(--liked-dot-size);
   border-radius: 50%;
   background: var(--stage-color);
   box-shadow: 0 0 0 1px #f3f4f6;
 }
 
-.performance.performance--marked time,
-.performance.performance--marked strong { color: #111318 }
+.performance.performance--liked time,
+.performance.performance--liked strong { color: #111318 }
 
 .performance-content {
   display: block;
   min-width: 0;
-}
-
-.tap-diagnostic {
-  position: absolute;
-  z-index: 2;
-  top: var(--performance-spacing);
-  right: var(--performance-spacing);
-  display: grid;
-  width: var(--tap-diagnostic-size);
-  height: var(--tap-diagnostic-size);
-  place-items: center;
-  border: 1px solid var(--stage-color);
-  border-radius: 50%;
-  color: #111318;
-  background: #fff;
-  font-size: var(--tap-diagnostic-font-size);
-  font-weight: 800;
-  line-height: 1;
-  pointer-events: none;
 }
 
 .performance:focus-visible {
@@ -441,8 +445,8 @@ footer {
 }
 
 @media (prefers-color-scheme: light) {
-  .performance.performance--marked,
-  .performance.performance--marked:active {
+  .performance.performance--liked,
+  .performance.performance--liked:active {
     border-color: #252830;
     border-left-color: var(--stage-color);
     background: #17191f;
@@ -450,10 +454,12 @@ footer {
     box-shadow: inset 0 0 0 1px #343740;
   }
 
-  .performance.performance--marked time,
-  .performance.performance--marked strong { color: #f5f6f8 }
-  .performance--marked::after { box-shadow: 0 0 0 1px #17191f }
+  .performance.performance--liked time,
+  .performance.performance--liked strong { color: #f5f6f8 }
+  .performance--liked::after { box-shadow: 0 0 0 1px #17191f }
 }
+
+.app--like-mode .performance { cursor: pointer }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important }
