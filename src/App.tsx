@@ -52,7 +52,7 @@ export default function App() {
     dialogRef.current?.close()
   }
   return (
-    <main className="app">
+    <main className={`app${liking.likeMode ? ' app--like-mode' : ''}`}>
       <header className="compact-header">
         <div className="brand-mark">
           <img
@@ -70,6 +70,15 @@ export default function App() {
         <button className="time-control-button" type="button" aria-label="Open time controls" onClick={openTimeControls}>
           {timeState.mode === 'simulated' && <b>SIM </b>}
           {formatPragueDateTime(activeTime)}
+        </button>
+        <button
+          className={`like-mode-button${liking.likeMode ? ' like-mode-button--active' : ''}`}
+          type="button"
+          aria-label={liking.likeMode ? 'Exit Like Mode' : 'Enter Like Mode'}
+          aria-pressed={liking.likeMode}
+          onClick={liking.toggleLikeMode}
+        >
+          <span aria-hidden="true">{liking.likeMode ? '♥' : '♡'}</span>
         </button>
         <nav className="day-selector" aria-label="Festival day">
           {festivalDays.map((day) => (
