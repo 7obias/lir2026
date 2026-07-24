@@ -20,12 +20,7 @@ https://letitroll.at/wp-content/uploads/maps/lir26_map.jpg
 
 It is stored locally with the app and is not fetched from the source website at runtime.
 
-The compact header uses the official transparent white wordmark published by the
-festival website:
-
-https://letitroll.eu/wp-content/uploads/2025/06/LIR_WEB_header_truesize.png
-
-The square header emblem and every browser, Apple touch, and installed-PWA icon
+The header emblem and every browser, Apple touch, and installed-PWA icon
 are derived from `public/logo.png`. `npm run build` regenerates those icon sizes
 from that single local source before compiling the application.
 

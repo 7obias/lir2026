@@ -49,8 +49,8 @@ export default function App() {
         <div className="brand-mark">
           <img
             className="header-logo"
-            src={`${import.meta.env.BASE_URL}branding/let-it-roll-logo-white.png`}
-            alt="Let It Roll"
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="Let It Roll emblem"
           />
           <small
             className="build-id"
@@ -76,11 +76,6 @@ export default function App() {
           {timeState.mode === 'simulated' && <b>SIM · </b>}
           {formatPragueDateTime(activeTime)}
         </button>
-        <img
-          className="header-project-logo"
-          src={`${import.meta.env.BASE_URL}logo.png`}
-          alt="Let It Roll emblem"
-        />
       </header>
       <div className="safe-area-content">
         <div className="timetable-scroll" aria-label="Thursday timetable" ref={scrollerRef}>
@@ -198,7 +193,6 @@ export default function App() {
         </div>
       </div>
       </div>
-      <footer>Timetable data sourced from the official Let It Roll 2026 timetable. Schedule may change.</footer>
       <FestivalMap location={mapStage} onClose={() => setMapStage(undefined)} />
       <dialog className="time-dialog" ref={dialogRef}>
         <form method="dialog" onSubmit={(event) => event.preventDefault()}>

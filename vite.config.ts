@@ -31,7 +31,6 @@ export default defineConfig(() => {
         'favicon-16.png',
         'favicon-32.png',
         'apple-touch-icon.png',
-        'branding/let-it-roll-logo-white.png',
         'icons/icon-192.png',
         'icons/icon-512.png',
         'icons/icon-maskable-512.png',
