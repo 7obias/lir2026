@@ -13,6 +13,31 @@ export const artistImageSearchUrl = (artist: string) => (
   `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(`${artist.trim()} DJ`)}`
 )
 
+export const artistImageSearchLinkAttributes = (artist: string) => ({
+  href: artistImageSearchUrl(artist),
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  referrerPolicy: 'no-referrer',
+} as const)
+
+export function openArtistImageSearch(artist: string, ownerDocument: Document = document) {
+  const link = ownerDocument.createElement('a')
+  const attributes = artistImageSearchLinkAttributes(artist)
+  link.href = attributes.href
+  link.target = attributes.target
+  link.rel = attributes.rel
+  link.referrerPolicy = attributes.referrerPolicy
+  link.setAttribute('aria-hidden', 'true')
+  link.style.position = 'fixed'
+  link.style.width = '1px'
+  link.style.height = '1px'
+  link.style.opacity = '0'
+  link.style.pointerEvents = 'none'
+  ownerDocument.body.append(link)
+  link.click()
+  link.remove()
+}
+
 export function useArtistSearchMode(shouldSuppressTap: () => boolean) {
   const [artistSearchMode, setArtistSearchMode] = useState(false)
   const pointersRef = useRef(new Map<number, SearchPointer>())
@@ -69,7 +94,7 @@ export function useArtistSearchMode(shouldSuppressTap: () => boolean) {
 
     event.preventDefault()
     event.stopPropagation()
-    window.open(artistImageSearchUrl(pointer.artist), '_blank', 'noopener,noreferrer')
+    openArtistImageSearch(pointer.artist, event.currentTarget.ownerDocument)
   }
 
   const onPointerCancel = (event: ReactPointerEvent<HTMLButtonElement>) => {

@@ -8,7 +8,7 @@ import { FestivalMap } from './FestivalMap'
 import { mapStageLocationsById, type MapStageLocation } from './data/mapStageLocations'
 import { useStageMapTap } from './useStageMapTap'
 import { useSelectedDay } from './useSelectedDay'
-import { artistImageSearchUrl, useArtistSearchMode } from './useArtistSearchMode'
+import { openArtistImageSearch, useArtistSearchMode } from './useArtistSearchMode'
 
 const performanceIds = new Set(allPerformances.map(({ id }) => id))
 
@@ -245,7 +245,7 @@ export default function App() {
                           liking.toggleLiked(performance.id)
                         } else if (artistSearch.artistSearchMode && (event.key === 'Enter' || event.key === ' ')) {
                           event.preventDefault()
-                          window.open(artistImageSearchUrl(performance.artist), '_blank', 'noopener,noreferrer')
+                          openArtistImageSearch(performance.artist, event.currentTarget.ownerDocument)
                         }
                       }}
                     >
