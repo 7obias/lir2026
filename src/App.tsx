@@ -54,50 +54,52 @@ export default function App() {
   return (
     <main className={`app${liking.likeMode ? ' app--like-mode' : ''}`}>
       <header className="compact-header">
-        <div className="brand-mark">
-          <img
-            className="header-logo"
-            src={`${import.meta.env.BASE_URL}logo.png`}
-            alt="Let It Roll emblem"
-          />
-          <small
-            className="build-id"
-            aria-label={`Application build ${__BUILD_NUMBER__}, commit ${__BUILD_REVISION__}`}
-          >
-            B{__BUILD_NUMBER__} · {__BUILD_REVISION__}
-          </small>
-        </div>
-        <button className="time-control-button" type="button" aria-label="Open time controls" onClick={openTimeControls}>
-          {timeState.mode === 'simulated' && <b>SIM </b>}
-          {formatPragueDateTime(activeTime)}
-        </button>
-        <button
-          className={`like-mode-button${liking.likeMode ? ' like-mode-button--active' : ''}`}
-          type="button"
-          aria-label={liking.likeMode ? 'Exit Like Mode' : 'Enter Like Mode'}
-          aria-pressed={liking.likeMode}
-          onClick={liking.toggleLikeMode}
-        >
-          <span aria-hidden="true">{liking.likeMode ? '♥' : '♡'}</span>
-        </button>
-        <nav className="day-selector" aria-label="Festival day">
-          {festivalDays.map((day) => (
-            <button
-              type="button"
-              key={day.id}
-              className={day.id === selectedDay.id ? 'day-selector__day day-selector__day--active' : 'day-selector__day'}
-              aria-label={`${day.label}${effectiveFestivalDay?.id === day.id ? ', effective current festival day' : ''}`}
-              aria-pressed={day.id === selectedDay.id}
-              onClick={() => {
-                setSelectedDayId(day.id)
-                if (scrollerRef.current) scrollerRef.current.scrollTop = 0
-              }}
+        <div className="toolbar-content">
+          <div className="brand-mark">
+            <img
+              className="header-logo"
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="Let It Roll emblem"
+            />
+            <small
+              className="build-id"
+              aria-label={`Application build ${__BUILD_NUMBER__}, commit ${__BUILD_REVISION__}`}
             >
-              {effectiveFestivalDay?.id === day.id && <span aria-hidden="true">★ </span>}
-              {day.label.slice(0, 3).toUpperCase()}
-            </button>
-          ))}
-        </nav>
+              B{__BUILD_NUMBER__} · {__BUILD_REVISION__}
+            </small>
+          </div>
+          <button className="time-control-button" type="button" aria-label="Open time controls" onClick={openTimeControls}>
+            {timeState.mode === 'simulated' && <b>SIM </b>}
+            {formatPragueDateTime(activeTime)}
+          </button>
+          <button
+            className={`like-mode-button${liking.likeMode ? ' like-mode-button--active' : ''}`}
+            type="button"
+            aria-label={liking.likeMode ? 'Exit Like Mode' : 'Enter Like Mode'}
+            aria-pressed={liking.likeMode}
+            onClick={liking.toggleLikeMode}
+          >
+            <span aria-hidden="true">{liking.likeMode ? '♥' : '♡'}</span>
+          </button>
+          <nav className="day-selector" aria-label="Festival day">
+            {festivalDays.map((day) => (
+              <button
+                type="button"
+                key={day.id}
+                className={day.id === selectedDay.id ? 'day-selector__day day-selector__day--active' : 'day-selector__day'}
+                aria-label={`${day.label}${effectiveFestivalDay?.id === day.id ? ', effective current festival day' : ''}`}
+                aria-pressed={day.id === selectedDay.id}
+                onClick={() => {
+                  setSelectedDayId(day.id)
+                  if (scrollerRef.current) scrollerRef.current.scrollTop = 0
+                }}
+              >
+                {effectiveFestivalDay?.id === day.id && <span aria-hidden="true">★ </span>}
+                {day.label.slice(0, 3).toUpperCase()}
+              </button>
+            ))}
+          </nav>
+        </div>
       </header>
       <div className="safe-area-content">
         <div className="timetable-scroll" aria-label={`${selectedDay.label} timetable`} ref={scrollerRef}>
