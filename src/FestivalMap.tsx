@@ -354,7 +354,6 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
                 role="status"
                 aria-label={`${location.mapLabel} highlighted on festival map`}
               >
-                <span>{location.mapLabel}</span>
               </span>
             )}
             {calibrationOpen && (

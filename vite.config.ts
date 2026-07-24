@@ -26,7 +26,7 @@ export default defineConfig(() => {
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png', 'maps/lir26-map.jpg'],
+      includeAssets: ['apple-touch-icon.png', 'branding/let-it-roll-logo-white.png', 'icons/icon-192.png', 'icons/icon-512.png', 'maps/lir26-map.jpg'],
       manifest: {
         id: '/lir2026/',
         name: 'Let It Roll 2026 Thursday Timetable',

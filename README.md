@@ -20,6 +20,11 @@ https://letitroll.at/wp-content/uploads/maps/lir26_map.jpg
 
 It is stored locally with the app and is not fetched from the source website at runtime.
 
+The compact header uses the official transparent white wordmark published by the
+festival website:
+
+https://letitroll.eu/wp-content/uploads/2025/06/LIR_WEB_header_truesize.png
+
 ## Current scope
 
 - Thursday 30 July 2026 only

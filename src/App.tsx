@@ -47,7 +47,11 @@ export default function App() {
     <main className={`app${liking.likeMode ? ' app--like-mode' : ''}`}>
       <header className="compact-header">
         <div className="brand-mark">
-          <img className="header-logo" src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" />
+          <img
+            className="header-logo"
+            src={`${import.meta.env.BASE_URL}branding/let-it-roll-logo-white.png`}
+            alt="Let It Roll"
+          />
           <small
             className="build-id"
             aria-label={`Application build ${__BUILD_NUMBER__}, commit ${__BUILD_REVISION__}`}

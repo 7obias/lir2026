@@ -54,7 +54,7 @@ export function useLiveMapPosition(active: boolean, transform?: FestivalMapTrans
     if (heading === undefined) return
     headingRef.current = smoothHeading(headingRef.current, normalizeHeading(heading))
     setPosition((current) => current ? { ...current, heading: headingRef.current } : current)
-    setMessage('Position and direction are approximate')
+    setMessage('')
   }, [])
 
   const stop = useCallback(() => {
@@ -89,9 +89,9 @@ export function useLiveMapPosition(active: boolean, transform?: FestivalMapTrans
         orientationEnabledRef.current = true
         window.addEventListener('deviceorientation', onOrientation, true)
       } else {
-        setMessage('Position active · Direction unavailable')
+        setMessage('')
       }
-    }).catch(() => setMessage('Position active · Direction unavailable'))
+    }).catch(() => setMessage(''))
 
     if (!navigator.geolocation) {
       setStatus('error')
@@ -112,9 +112,7 @@ export function useLiveMapPosition(active: boolean, transform?: FestivalMapTrans
           heading: headingRef.current,
         })
         setStatus('active')
-        setMessage(headingRef.current === undefined
-          ? 'Position active · Direction unavailable'
-          : 'Position and direction are approximate')
+        setMessage('')
       },
       (error) => {
         setStatus('error')
