@@ -1,4 +1,4 @@
-name: Deploy Thursday timetable
+name: Deploy festival timetable
 
 on:
   push:

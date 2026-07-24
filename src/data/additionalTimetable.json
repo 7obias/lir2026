@@ -1,0 +1,796 @@
+[
+  {
+    "date": "2026-07-31",
+    "headers": [
+      "GENERATOR",
+      "FACTORY",
+      "SOUND GARDEN",
+      "ARCHIVE | Monstercat Takeover",
+      "BASS SHELTER | Subardo Takeover",
+      "PORT STAGE | powered by Beefeater"
+    ],
+    "events": [
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "mi0m",
+        "start": "13:00",
+        "end": "14:30"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Shmidoo (Liquid Set)",
+        "start": "14:00",
+        "end": "15:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "DNB STEP",
+        "start": "14:00",
+        "end": "16:00"
+      },
+      {
+        "stage": "PORT STAGE | powered by Beefeater",
+        "artist": "Bea",
+        "start": "14:00",
+        "end": "15:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Matryoschka",
+        "start": "14:30",
+        "end": "16:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Eska & Kamcza",
+        "start": "15:00",
+        "end": "16:00"
+      },
+      {
+        "stage": "PORT STAGE | powered by Beefeater",
+        "artist": "Gino",
+        "start": "15:30",
+        "end": "16:30"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Entita",
+        "start": "16:00",
+        "end": "17:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Filip DTA",
+        "start": "16:00",
+        "end": "17:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "audite",
+        "start": "16:00",
+        "end": "17:30"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "Tony Terra",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Modest Intentions",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Spiritual",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "PORT STAGE | powered by Beefeater",
+        "artist": "IMANU \"Signal set\"",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "anotha90skid",
+        "start": "17:30",
+        "end": "18:45"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "Bea",
+        "start": "18:00",
+        "end": "19:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "LSB",
+        "start": "18:00",
+        "end": "19:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Yussi",
+        "start": "18:00",
+        "end": "19:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "^foxic^",
+        "start": "18:45",
+        "end": "19:45"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Critical Soundsystem (Kasra, Visla, Waeys)",
+        "start": "19:00",
+        "end": "20:00"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "Dieselboy",
+        "start": "19:00",
+        "end": "20:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Yue",
+        "start": "19:00",
+        "end": "20:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "GENTLEMENS CLUB",
+        "start": "19:00",
+        "end": "20:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Annca & ACE w/ Benski",
+        "start": "19:45",
+        "end": "20:45"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Luude b2b Rova",
+        "start": "20:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "Tanukichi b2b B-Complex",
+        "start": "20:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Nixxy Rain",
+        "start": "20:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Aeon:mode",
+        "start": "20:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Sequent",
+        "start": "20:45",
+        "end": "22:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Hybrid Minds",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "DRKNET (Mel b2b Enta)",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Etherwood & LowQui",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Modestep (DJ set)",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "★ OPENING CEREMONY - IMMORTAL FREQUENCY ★",
+        "start": "22:00",
+        "end": "22:30"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Pendulum (live)",
+        "start": "22:30",
+        "end": "23:30"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "The Neuroheadz (special guest Xylym)",
+        "start": "22:30",
+        "end": "23:30"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Skylark b2b Yaano",
+        "start": "22:30",
+        "end": "23:45"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "ALLEYCVT",
+        "start": "22:30",
+        "end": "23:45"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Base w/ Zhi MC",
+        "start": "22:30",
+        "end": "23:30"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "Black Sun Empire & LowQui",
+        "start": "23:30",
+        "end": "00:30"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Derrick w/ Zhi MC",
+        "start": "23:30",
+        "end": "00:30"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Camo & Krooked b2b Mefjus",
+        "start": "23:45",
+        "end": "01:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Klinical b2b Wingz",
+        "start": "23:45",
+        "end": "01:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "NGHTMRE",
+        "start": "23:45",
+        "end": "01:00"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "VIRUS TRINITY (Audio b2b Ed Rush b2b Optical)",
+        "start": "00:30",
+        "end": "02:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Hectical & Filibration",
+        "start": "00:30",
+        "end": "01:45"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Netsky",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Koherent b2b Molecular",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "MUZZ",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Gourski",
+        "start": "01:45",
+        "end": "02:45"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Koven",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "Pythius b2b Merikan",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "TeeBee",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Dirtyphonics",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "KamiKatze & Polaster",
+        "start": "02:45",
+        "end": "04:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Youphoria",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "FACTORY",
+        "artist": "Zardonic",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Amoss b2b QZB",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Pirapus",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "SOUND GARDEN",
+        "artist": "Teej b2b Revan",
+        "start": "04:00",
+        "end": "05:00"
+      },
+      {
+        "stage": "ARCHIVE | Monstercat Takeover",
+        "artist": "Gladde Paling",
+        "start": "04:00",
+        "end": "05:00"
+      },
+      {
+        "stage": "BASS SHELTER | Subardo Takeover",
+        "artist": "Cine",
+        "start": "04:00",
+        "end": "05:00"
+      }
+    ]
+  },
+  {
+    "date": "2026-08-01",
+    "headers": [
+      "GENERATOR",
+      "FACTORY | 15 years of Eatbrain",
+      "SOUND GARDEN | DNBArena 30Y Takeover",
+      "ARCHIVE | WAH Takeover",
+      "BASS SHELTER",
+      "PORT STAGE | powered by Beefeater"
+    ],
+    "events": [
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Schwan",
+        "start": "13:00",
+        "end": "14:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Linn",
+        "start": "14:00",
+        "end": "15:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "DNB STEP",
+        "start": "14:00",
+        "end": "16:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Crystal",
+        "start": "14:00",
+        "end": "15:00"
+      },
+      {
+        "stage": "PORT STAGE | powered by Beefeater",
+        "artist": "Mandidextrous",
+        "start": "14:00",
+        "end": "15:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Mustaffa & Sheriff",
+        "start": "15:00",
+        "end": "16:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "ILLUSION (Matty b2b Twinki)",
+        "start": "15:00",
+        "end": "16:00"
+      },
+      {
+        "stage": "PORT STAGE | powered by Beefeater",
+        "artist": "A-Cray x Raido x Zigi SC",
+        "start": "15:30",
+        "end": "16:30"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Fallen Gemini b2b Lee Meow",
+        "start": "16:00",
+        "end": "17:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Dave Shichman",
+        "start": "16:00",
+        "end": "17:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "SpaceJam crew showcase: Capski, Nio, Goosebumps, Jakoob, Junger, Byapee, Zeddy, Gekoner, Killfirst",
+        "start": "16:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Mind:Freqnz",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Spill",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Snookey b2b Dreamworkers",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "PORT STAGE | powered by Beefeater",
+        "artist": "Kove: Liquid dancefloor set (2005-2010 era vibe)",
+        "start": "17:00",
+        "end": "18:00"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Ceeya & Nemesis",
+        "start": "18:00",
+        "end": "19:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Drawn Moon",
+        "start": "18:00",
+        "end": "19:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Sofiqa",
+        "start": "18:00",
+        "end": "19:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Zudakabass",
+        "start": "18:00",
+        "end": "19:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Rido",
+        "start": "18:30",
+        "end": "19:30"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Dub Elements",
+        "start": "19:00",
+        "end": "20:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Madface",
+        "start": "19:00",
+        "end": "20:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "VXRGO",
+        "start": "19:00",
+        "end": "20:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "NEXT:GEN SHOWCASE - CRITICAL J ROCKI MADDOS SUBSKO / ROOK BADDABAP KILLFIRST",
+        "start": "19:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Harriet Jaxxon",
+        "start": "19:30",
+        "end": "20:30"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Tesseracts",
+        "start": "20:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Kove",
+        "start": "20:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "OKO",
+        "start": "20:00",
+        "end": "21:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Metrik b2b Grafix",
+        "start": "20:30",
+        "end": "21:30"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Raido b2b Symplex",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Technimatic & LowQui",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "GLXY",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Drop Database",
+        "start": "21:00",
+        "end": "22:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Kanine",
+        "start": "21:30",
+        "end": "22:30"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "A-Cray b2b Zigi SC",
+        "start": "22:00",
+        "end": "23:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Aphrodite",
+        "start": "22:00",
+        "end": "23:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Charlie Tee",
+        "start": "22:00",
+        "end": "23:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Pixie",
+        "start": "22:00",
+        "end": "23:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Modestep (Live)",
+        "start": "22:45",
+        "end": "23:45"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Manta b2b Screamarts",
+        "start": "23:00",
+        "end": "00:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Lens",
+        "start": "23:00",
+        "end": "00:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "A Little Sound",
+        "start": "23:00",
+        "end": "00:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "DOVN",
+        "start": "23:00",
+        "end": "00:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Chase & Status",
+        "start": "00:00",
+        "end": "01:00"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Mob Tactics b2b Midnight Cvlt",
+        "start": "00:00",
+        "end": "01:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "LTJ Bukem",
+        "start": "00:00",
+        "end": "01:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "[IVY] b2b Mandidextrous",
+        "start": "00:00",
+        "end": "01:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Jahh Roland",
+        "start": "00:00",
+        "end": "01:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Delta Heavy & Daxta",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Jade Venom b2b Teddy Killerz",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "S.P.Y & LowQui",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Circadian",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Sapi b2b iGOR",
+        "start": "01:00",
+        "end": "02:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Friction b2b Mozey",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Burr Oak b2b Redpill",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Emperor",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Simula b2b Skantia",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Voidsec b2b Towie",
+        "start": "02:00",
+        "end": "03:00"
+      },
+      {
+        "stage": "GENERATOR",
+        "artist": "Don Diablo presents: CONTROL ALT DΞLΞTΞ & Daxta",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "FACTORY | 15 years of Eatbrain",
+        "artist": "Agressor Bunx b2b MNDSCP",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "Kyrist",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Turno b2b Gino",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "Bass Fighters",
+        "start": "03:00",
+        "end": "04:00"
+      },
+      {
+        "stage": "SOUND GARDEN | DNBArena 30Y Takeover",
+        "artist": "No Money b2b Fantek",
+        "start": "04:00",
+        "end": "05:00"
+      },
+      {
+        "stage": "ARCHIVE | WAH Takeover",
+        "artist": "Akira b2b Bifidus Aktif",
+        "start": "04:00",
+        "end": "05:00"
+      },
+      {
+        "stage": "BASS SHELTER",
+        "artist": "MiRo",
+        "start": "04:00",
+        "end": "05:00"
+      }
+    ]
+  }
+]

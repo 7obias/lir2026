@@ -1,4 +1,4 @@
-import type { Performance } from './data/thursdayTimetable'
+import type { Performance } from './data/festivalTimetable'
 
 export const PIXELS_PER_MINUTE = 0.72
 export const TIME_COLUMN_WIDTH = 34
@@ -16,8 +16,8 @@ export function blockPosition(performance: Performance, origin: string) {
   }
 }
 
-export function stageColumnWidth(viewportWidth: number): number {
-  return (viewportWidth - TIME_COLUMN_WIDTH) / 7
+export function stageColumnWidth(viewportWidth: number, stageCount = 7): number {
+  return (viewportWidth - TIME_COLUMN_WIDTH) / stageCount
 }
 
 export function performanceStatus(performance: Performance, activeTime: Date): PerformanceStatus {

@@ -1,5 +1,5 @@
-import { useRef, useState, type CSSProperties } from 'react'
-import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
+import { useMemo, useRef, useState, type CSSProperties } from 'react'
+import { allPerformances, festivalDays } from './data/festivalTimetable'
 import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE } from './timetable'
 import { formatPragueDateTime, pragueLocalInputToDate, useActiveTime, type TimeMode } from './useActiveTime'
 import { useLikedPerformances } from './useLikedPerformances'
@@ -7,13 +7,16 @@ import { useTimetableZoom } from './useTimetableZoom'
 import { FestivalMap } from './FestivalMap'
 import { mapStageLocationsById, type MapStageLocation } from './data/mapStageLocations'
 import { useStageMapTap } from './useStageMapTap'
+import { useSelectedDay } from './useSelectedDay'
 
-const totalHeight = minutesFrom(THURSDAY_START, THURSDAY_END) * PIXELS_PER_MINUTE
-const performanceIds = new Set(performances.map(({ id }) => id))
-const guides = Array.from({ length: 27 }, (_, index) => {
-  const timestamp = new Date(new Date(THURSDAY_START).getTime() + index * 30 * 60_000).toISOString()
-  return { timestamp, top: index * 30 * PIXELS_PER_MINUTE }
-})
+const performanceIds = new Set(allPerformances.map(({ id }) => id))
+
+const dayDateLabel = (date: string) => new Intl.DateTimeFormat('en-GB', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'Europe/Prague',
+}).format(new Date(`${date}T12:00:00+02:00`))
 
 export default function App() {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -21,13 +24,24 @@ export default function App() {
   const timelineBodyRef = useRef<HTMLDivElement>(null)
   const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
   const liking = useLikedPerformances(performanceIds, zoom.shouldSuppressClick)
+  const { selectedDayId, setSelectedDayId } = useSelectedDay(festivalDays)
+  const selectedDay = festivalDays.find(({ id }) => id === selectedDayId) ?? festivalDays[0]
   const [mapStage, setMapStage] = useState<MapStageLocation>()
   const stageMapTap = useStageMapTap((stageId) => setMapStage(mapStageLocationsById.get(stageId)))
   const { activeTime, timeState, setTimeState, activateLive } = useActiveTime()
   const [draftMode, setDraftMode] = useState<TimeMode>(timeState.mode)
   const [draftDateTime, setDraftDateTime] = useState(timeState.simulatedDateTime ?? '2026-07-30T22:00')
-  const cursorMinutes = minutesFrom(THURSDAY_START, activeTime.toISOString())
-  const showCursor = activeTime >= new Date(THURSDAY_START) && activeTime <= new Date(THURSDAY_END)
+  const totalMinutes = minutesFrom(selectedDay.start, selectedDay.end)
+  const totalHeight = totalMinutes * PIXELS_PER_MINUTE
+  const guides = useMemo(() => Array.from(
+    { length: Math.floor(totalMinutes / 30) + 1 },
+    (_, index) => {
+      const timestamp = new Date(new Date(selectedDay.start).getTime() + index * 30 * 60_000).toISOString()
+      return { timestamp, top: index * 30 * PIXELS_PER_MINUTE }
+    },
+  ), [selectedDay.start, totalMinutes])
+  const cursorMinutes = minutesFrom(selectedDay.start, activeTime.toISOString())
+  const showCursor = activeTime >= new Date(selectedDay.start) && activeTime <= new Date(selectedDay.end)
   const simulatedInputIsValid = !Number.isNaN(pragueLocalInputToDate(draftDateTime).getTime())
   const openTimeControls = () => {
     setDraftMode(timeState.mode)
@@ -61,8 +75,24 @@ export default function App() {
         </div>
         <div className="header-title">
           <strong>Let It Roll 2026</strong>
-          <span>Thursday 30 July</span>
+          <span>{dayDateLabel(selectedDay.date)}</span>
         </div>
+        <nav className="day-selector" aria-label="Festival day">
+          {festivalDays.map((day) => (
+            <button
+              type="button"
+              key={day.id}
+              className={day.id === selectedDay.id ? 'day-selector__day day-selector__day--active' : 'day-selector__day'}
+              aria-pressed={day.id === selectedDay.id}
+              onClick={() => {
+                setSelectedDayId(day.id)
+                if (scrollerRef.current) scrollerRef.current.scrollTop = 0
+              }}
+            >
+              {day.label}
+            </button>
+          ))}
+        </nav>
         <button
           className={`like-mode-button${liking.likeMode ? ' like-mode-button--active' : ''}`}
           type="button"
@@ -78,12 +108,13 @@ export default function App() {
         </button>
       </header>
       <div className="safe-area-content">
-        <div className="timetable-scroll" aria-label="Thursday timetable" ref={scrollerRef}>
+        <div className="timetable-scroll" aria-label={`${selectedDay.label} timetable`} ref={scrollerRef}>
           <div
             className="timetable"
             style={{
               '--timetable-width': `${zoom.scale * 100}%`,
               '--timeline-height': `${totalHeight * zoom.scale}px`,
+              '--stage-count': selectedDay.stages.length,
               '--portrait-min-width': `${810 * zoom.scale}px`,
               '--performance-font-size': `${8 * zoom.scale}px`,
               '--performance-time-font-size': `${7 * zoom.scale}px`,
@@ -95,7 +126,7 @@ export default function App() {
           >
           <div className="stage-row">
             <div className="time-heading">TIME</div>
-            {stages.map((stage) => (
+            {selectedDay.stages.map((stage) => (
               <button
                 type="button"
                 className={`stage-heading stage-${stage.order}`}
@@ -147,10 +178,15 @@ export default function App() {
                 <span className="current-time-label">{formatTime(activeTime.toISOString())}</span>
               </div>
             )}
-            {stages.map((stage) => (
-              <section className={`stage-lane stage-${stage.order}`} aria-label={stage.name} key={stage.id}>
-                {performances.filter((performance) => performance.stageId === stage.id).map((performance) => {
-                  const position = blockPosition(performance, THURSDAY_START)
+            {selectedDay.stages.map((stage, stageIndex) => (
+              <section
+                className={`stage-lane stage-${stage.order}`}
+                style={{ gridColumn: stageIndex + 2 }}
+                aria-label={stage.name}
+                key={stage.id}
+              >
+                {selectedDay.performances.filter((performance) => performance.stageId === stage.id).map((performance) => {
+                  const position = blockPosition(performance, selectedDay.start)
                   const status = performanceStatus(performance, activeTime)
                   const statusLabel = status === 'current'
                     ? 'Playing now'

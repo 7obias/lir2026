@@ -73,6 +73,31 @@ body { background: #07080c; overflow-x: hidden }
 .header-title strong { font-size: 11px; letter-spacing: .02em }
 .header-title span { font-size: 9px; color: #d8dae0 }
 
+.day-selector {
+  min-width: 0;
+  display: flex;
+  gap: 2px;
+}
+
+.day-selector__day {
+  min-height: 26px;
+  padding: 3px 6px;
+  border: 1px solid #343844;
+  border-radius: 3px;
+  color: #b9bcc5;
+  background: #151820;
+  font: inherit;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.day-selector__day--active {
+  border-color: #d9dbe2;
+  color: #08090c;
+  background: #f2f3f6;
+  font-weight: 700;
+}
+
 .time-control-button {
   min-height: 26px;
   margin-left: 0;
@@ -110,6 +135,7 @@ body { background: #07080c; overflow-x: hidden }
 
 .time-control-button b { color: #e8c85d; font-size: 8px }
 .like-mode-button:focus-visible,
+.day-selector__day:focus-visible,
 .time-control-button:focus-visible,
 .time-dialog button:focus-visible,
 .time-dialog input:focus-visible { outline: 2px solid #6ed5e9; outline-offset: 1px }
@@ -143,7 +169,7 @@ body { background: #07080c; overflow-x: hidden }
 .stage-row,
 .timeline-body {
   display: grid;
-  grid-template-columns: var(--time-width) repeat(7, minmax(0, 1fr));
+  grid-template-columns: var(--time-width) repeat(var(--stage-count), minmax(0, 1fr));
 }
 
 .stage-row {
@@ -274,14 +300,6 @@ body { background: #07080c; overflow-x: hidden }
   height: 100%;
   border-right: 1px solid #1d2027;
 }
-
-.stage-lane:nth-of-type(1) { grid-column: 2 }
-.stage-lane:nth-of-type(2) { grid-column: 3 }
-.stage-lane:nth-of-type(3) { grid-column: 4 }
-.stage-lane:nth-of-type(4) { grid-column: 5 }
-.stage-lane:nth-of-type(5) { grid-column: 6 }
-.stage-lane:nth-of-type(6) { grid-column: 7 }
-.stage-lane:nth-of-type(7) { grid-column: 8 }
 
 .stage-0 { --stage-color: #e85757 }
 .stage-1 { --stage-color: #de9b3f }
@@ -449,6 +467,7 @@ body { background: #07080c; overflow-x: hidden }
   .header-title span { display: none }
   .header-title strong { font-size: 10px }
   .build-id { font-size: 6px }
+  .day-selector__day { padding-inline: 4px; font-size: 7px }
   .time-control-button { font-size: 8px }
 }
 

@@ -1,16 +1,22 @@
-# Let It Roll 2026 — Thursday timetable
+# Let It Roll 2026 — festival timetable
 
-A deliberately minimal, mobile-first timetable viewer for **Thursday 30 July 2026**. It presents seven stages in a compact time grid designed primarily for an iPhone Max-sized device in landscape orientation.
+A deliberately minimal, mobile-first timetable viewer for all three published festival
+days: **Thursday 30 July, Friday 31 July, and Saturday 1 August 2026**. It presents
+each day’s stages in a compact time grid designed primarily for an iPhone Max-sized
+device in landscape orientation.
 
 The application has no accounts, planning tools, imports, editing controls, databases, or remote runtime APIs. Liked sets are stored locally in the browser.
 
 ## Official timetable source
 
-Thursday performance data was extracted from the official timetable:
+Performance data for all published days was extracted from the official timetable:
 
 https://letitroll.eu/time/
 
-The official page provides a semantic HTML table with stage headers and performance cells containing explicit `data-start` and `data-end` values. The local data file preserves those stage relationships and times. The deployed app does not fetch or scrape the official website at runtime.
+The official page provides semantic HTML tables with stage headers and performance
+cells containing explicit `data-start` and `data-end` values. The local data preserves
+those stage relationships and times. The deployed app does not fetch or scrape the
+official website at runtime.
 
 The timetable may change. Check the official source for the latest information.
 
@@ -26,15 +32,10 @@ from that single local source before compiling the application.
 
 ## Current scope
 
-- Thursday 30 July 2026 only
-- Generator
-- Factory
-- Sound Garden
-- Archive — Modus Takeover
-- Bass Shelter
-- Port Stage — powered by Beefeater
-- Saurus
-- Complete Thursday programme through 01:00 on Friday morning
+- Thursday 30 July, Friday 31 July, and Saturday 1 August 2026
+- A compact persisted day selector
+- Day-specific stages and takeover subtitles
+- Complete programmes including performances after midnight
 - Europe/Prague time and 24-hour labels
 - Live or session-only simulated time with a matching timetable cursor
 - Past/current/upcoming performance states based on the active timetable time

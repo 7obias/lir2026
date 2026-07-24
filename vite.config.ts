@@ -39,9 +39,9 @@ export default defineConfig(() => {
       ],
       manifest: {
         id: '/lir2026/',
-        name: 'Let It Roll 2026 Thursday Timetable',
+        name: 'Let It Roll 2026 Festival Timetable',
         short_name: 'LIR Timetable',
-        description: 'Official Thursday timetable viewer for Let It Roll 2026.',
+        description: 'Official multi-day timetable viewer for Let It Roll 2026.',
         start_url: '/lir2026/',
         scope: '/lir2026/',
         display: 'standalone',

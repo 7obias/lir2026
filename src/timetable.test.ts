@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { allPerformances, festivalDays } from './data/festivalTimetable'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
 import { blockPosition, minutesFrom, performanceStatus, PIXELS_PER_MINUTE, stageColumnWidth, toggleSetMembership } from './timetable'
 
@@ -34,6 +35,53 @@ describe('official Thursday timetable data', () => {
   })
 })
 
+describe('official multi-day timetable data', () => {
+  it('contains every published day with stable unique performance IDs', () => {
+    expect(festivalDays.map(({ id, label, performances: dayPerformances }) => [
+      id,
+      label,
+      dayPerformances.length,
+    ])).toEqual([
+      ['2026-07-30', 'Thursday', 52],
+      ['2026-07-31', 'Friday', 62],
+      ['2026-08-01', 'Saturday', 66],
+    ])
+    expect(new Set(allPerformances.map(({ id }) => id)).size).toBe(allPerformances.length)
+  })
+
+  it('keeps every performance inside its festival-day window without stage overlaps', () => {
+    for (const day of festivalDays) {
+      const stageIds = new Set(day.stages.map(({ id }) => id))
+      for (const performance of day.performances) {
+        expect(stageIds.has(performance.stageId)).toBe(true)
+        expect(new Date(performance.start).getTime()).toBeLessThan(new Date(performance.end).getTime())
+        expect(new Date(performance.start).getTime()).toBeGreaterThanOrEqual(new Date(day.start).getTime())
+        expect(new Date(performance.end).getTime()).toBeLessThanOrEqual(new Date(day.end).getTime())
+      }
+      for (const stage of day.stages) {
+        const stagePerformances = day.performances
+          .filter(({ stageId }) => stageId === stage.id)
+          .sort((first, second) => new Date(first.start).getTime() - new Date(second.start).getTime())
+        expect(stagePerformances.length).toBeGreaterThan(0)
+        for (let index = 1; index < stagePerformances.length; index += 1) {
+          expect(new Date(stagePerformances[index - 1].end).getTime())
+            .toBeLessThanOrEqual(new Date(stagePerformances[index].start).getTime())
+        }
+      }
+    }
+  })
+
+  it('places Friday and Saturday after-midnight sets after their evening programme', () => {
+    for (const day of festivalDays.slice(1)) {
+      const evening = day.performances.find(({ start }) => start.includes('T23:'))
+      const afterMidnight = day.performances.find(({ start }) => start.includes('T00:'))
+      expect(evening).toBeDefined()
+      expect(afterMidnight).toBeDefined()
+      expect(blockPosition(afterMidnight!, day.start).top).toBeGreaterThan(blockPosition(evening!, day.start).top)
+    }
+  })
+})
+
 describe('timeline positioning', () => {
   it('maps timestamps and durations to proportional vertical pixels', () => {
     const performance = performances.find((item) => item.id === 'generator-2045-fox-stevenson')
@@ -54,6 +102,10 @@ describe('timeline positioning', () => {
   it.each([932, 844, 852])('fits the time column and seven readable stage columns at %ipx', (viewportWidth) => {
     expect(stageColumnWidth(viewportWidth)).toBeGreaterThan(115)
     expect(34 + stageColumnWidth(viewportWidth) * 7).toBe(viewportWidth)
+  })
+
+  it('supports days with six stage columns', () => {
+    expect(stageColumnWidth(844, 6)).toBe(135)
   })
 })
 
