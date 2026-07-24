@@ -76,6 +76,11 @@ export default function App() {
           {timeState.mode === 'simulated' && <b>SIM · </b>}
           {formatPragueDateTime(activeTime)}
         </button>
+        <img
+          className="header-project-logo"
+          src={`${import.meta.env.BASE_URL}logo.png`}
+          alt="Let It Roll emblem"
+        />
       </header>
       <div className="safe-area-content">
         <div className="timetable-scroll" aria-label="Thursday timetable" ref={scrollerRef}>

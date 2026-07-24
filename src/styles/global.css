@@ -54,6 +54,15 @@ body { background: #07080c; overflow-x: hidden }
   object-fit: contain;
 }
 
+.header-project-logo {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  max-width: 26px;
+  max-height: 26px;
+  object-fit: contain;
+}
+
 .brand-mark {
   flex: 0 0 auto;
   display: flex;
@@ -245,7 +254,9 @@ body { background: #07080c; overflow-x: hidden }
   right: 0;
   height: 2px;
   background: #ff456d;
-  box-shadow: 0 0 4px rgb(255 54 96 / .65);
+  box-shadow:
+    0 0 2px rgb(255 255 255 / .9),
+    0 0 5px rgb(255 255 255 / .42);
   pointer-events: none;
 }
 
@@ -451,10 +462,12 @@ footer {
 @media (orientation: landscape) and (max-height: 450px) {
   .timetable-scroll { height: 100% }
   .header-logo { width: 74px; height: 20px; max-width: 74px; max-height: 20px }
+  .header-project-logo { width: 22px; height: 22px; max-width: 22px; max-height: 22px }
 }
 
 @media (orientation: landscape) and (max-width: 720px) {
   .header-logo { width: 62px; height: 18px; max-width: 62px; max-height: 18px }
+  .header-project-logo { width: 20px; height: 20px; max-width: 20px; max-height: 20px }
   .header-title span { display: none }
   .header-title strong { font-size: 10px }
   .build-id { font-size: 6px }

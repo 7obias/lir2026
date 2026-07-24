@@ -25,6 +25,10 @@ festival website:
 
 https://letitroll.eu/wp-content/uploads/2025/06/LIR_WEB_header_truesize.png
 
+The square header emblem and every browser, Apple touch, and installed-PWA icon
+are derived from `public/logo.png`. `npm run build` regenerates those icon sizes
+from that single local source before compiling the application.
+
 ## Current scope
 
 - Thursday 30 July 2026 only
