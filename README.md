@@ -40,7 +40,7 @@ from that single local source before compiling the application.
 - Live or session-only simulated time with a matching timetable cursor
 - Past/current/upcoming performance states based on the active timetable time
 - Timetable-only two-finger zoom from 1× to 2.5× with sticky stage and time headers
-- Persistent set liking through the explicit Like Mode
+- Previously liked sets remain stored locally and retain their timetable styling
 - Stage headings open the locally bundled festival map at the selected stage
 - Optional, permission-gated live position and compass direction on the festival map
 - iPhone landscape safe-area insets for the sticky time rail

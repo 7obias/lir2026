@@ -69,13 +69,6 @@ body { background: #07080c; overflow-x: hidden }
   white-space: nowrap;
 }
 
-.header-date {
-  min-width: 0;
-  color: #d8dae0;
-  font-size: 9px;
-  white-space: nowrap;
-}
-
 .day-selector {
   min-width: 0;
   display: flex;
@@ -103,7 +96,7 @@ body { background: #07080c; overflow-x: hidden }
 
 .time-control-button {
   min-height: 26px;
-  margin-left: 0;
+  margin-left: auto;
   padding: 3px 6px;
   border: 1px solid #343844;
   border-radius: 3px;
@@ -114,30 +107,7 @@ body { background: #07080c; overflow-x: hidden }
   white-space: nowrap;
 }
 
-.like-mode-button {
-  flex: 0 0 auto;
-  width: 28px;
-  min-height: 26px;
-  margin-left: auto;
-  padding: 1px;
-  border: 1px solid #343844;
-  border-radius: 3px;
-  color: #d5d7dd;
-  background: #171a22;
-  font: inherit;
-  font-size: 17px;
-  line-height: 1;
-}
-
-.like-mode-button--active {
-  border-color: #f08ba4;
-  color: #ff7797;
-  background: #47202c;
-  box-shadow: inset 0 0 0 1px #7c3548;
-}
-
 .time-control-button b { color: #e8c85d; font-size: 8px }
-.like-mode-button:focus-visible,
 .day-selector__day:focus-visible,
 .time-control-button:focus-visible,
 .time-dialog button:focus-visible,
@@ -456,9 +426,7 @@ body { background: #07080c; overflow-x: hidden }
 
 @media (orientation: portrait) and (max-width: 700px) {
   .timetable { min-width: var(--portrait-min-width) }
-  .compact-header { flex-wrap: wrap; padding-block: 4px }
-  .header-date { flex: 1 1 auto }
-  .time-control-button { flex: 0 0 auto }
+  .compact-header { padding-block: 4px }
 }
 
 @media (orientation: landscape) and (max-height: 450px) {
@@ -468,13 +436,10 @@ body { background: #07080c; overflow-x: hidden }
 
 @media (orientation: landscape) and (max-width: 720px) {
   .header-logo { width: 18px; height: 18px; max-width: 18px; max-height: 18px }
-  .header-date { display: none }
   .build-id { font-size: 6px }
   .day-selector__day { padding-inline: 4px; font-size: 7px }
   .time-control-button { font-size: 8px }
 }
-
-.app--like-mode .performance { cursor: pointer }
 
 .map-dialog {
   width: 100vw;

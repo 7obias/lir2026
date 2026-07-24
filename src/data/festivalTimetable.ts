@@ -125,3 +125,11 @@ export const festivalDays: FestivalDay[] = [
 ]
 
 export const allPerformances = festivalDays.flatMap(({ performances }) => performances)
+
+export const festivalDayAtTime = (
+  days: readonly FestivalDay[],
+  activeTime: Date,
+) => days.find((day) => (
+  activeTime.getTime() >= new Date(day.start).getTime()
+  && activeTime.getTime() < new Date(day.end).getTime()
+))

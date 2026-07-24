@@ -38,7 +38,6 @@ export function pragueLocalInputToDate(value: string): Date {
 export function formatPragueDateTime(date: Date): string {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/Prague',
-    weekday: 'short',
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -46,7 +45,7 @@ export function formatPragueDateTime(date: Date): string {
     hour12: false,
   }).formatToParts(date)
   const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? ''
-  return `${value('weekday')} ${value('day')} ${value('month')} · ${value('hour')}:${value('minute')}`
+  return `${value('day')} ${value('month')} ${value('hour')}:${value('minute')}`
 }
 
 export function useActiveTime() {

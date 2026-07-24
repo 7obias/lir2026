@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allPerformances, festivalDays } from './data/festivalTimetable'
+import { allPerformances, festivalDayAtTime, festivalDays } from './data/festivalTimetable'
 import { performances, stages, THURSDAY_END, THURSDAY_START } from './data/thursdayTimetable'
 import { blockPosition, minutesFrom, performanceStatus, PIXELS_PER_MINUTE, stageColumnWidth, toggleSetMembership } from './timetable'
 
@@ -79,6 +79,18 @@ describe('official multi-day timetable data', () => {
       expect(afterMidnight).toBeDefined()
       expect(blockPosition(afterMidnight!, day.start).top).toBeGreaterThan(blockPosition(evening!, day.start).top)
     }
+  })
+
+  it('assigns effective time to festival programme windows across midnight', () => {
+    expect(festivalDayAtTime(festivalDays, new Date('2026-07-30T23:30:00+02:00'))?.id).toBe('2026-07-30')
+    expect(festivalDayAtTime(festivalDays, new Date('2026-07-31T00:30:00+02:00'))?.id).toBe('2026-07-30')
+    expect(festivalDayAtTime(festivalDays, new Date('2026-08-01T03:30:00+02:00'))?.id).toBe('2026-07-31')
+    expect(festivalDayAtTime(festivalDays, new Date('2026-07-31T08:00:00+02:00'))).toBeUndefined()
+  })
+
+  it('uses an exclusive festival-window end boundary', () => {
+    const thursday = festivalDays[0]
+    expect(festivalDayAtTime(festivalDays, new Date(thursday.end))?.id).not.toBe(thursday.id)
   })
 })
 

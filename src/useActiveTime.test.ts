@@ -9,7 +9,7 @@ describe('active timetable time', () => {
   })
 
   it('formats Prague festival time with a 24-hour clock', () => {
-    expect(formatPragueDateTime(new Date('2026-07-30T20:35:00.000Z'))).toBe('Thu 30 Jul · 22:35')
+    expect(formatPragueDateTime(new Date('2026-07-30T20:35:00.000Z'))).toBe('30 Jul 22:35')
   })
 
   it('rejects malformed simulated input', () => {

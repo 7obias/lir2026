@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type CSSProperties } from 'react'
-import { allPerformances, festivalDays } from './data/festivalTimetable'
+import { allPerformances, festivalDayAtTime, festivalDays } from './data/festivalTimetable'
 import { blockPosition, formatTime, minutesFrom, performanceStatus, PIXELS_PER_MINUTE } from './timetable'
 import { formatPragueDateTime, pragueLocalInputToDate, useActiveTime, type TimeMode } from './useActiveTime'
 import { useLikedPerformances } from './useLikedPerformances'
@@ -10,13 +10,6 @@ import { useStageMapTap } from './useStageMapTap'
 import { useSelectedDay } from './useSelectedDay'
 
 const performanceIds = new Set(allPerformances.map(({ id }) => id))
-
-const dayDateLabel = (date: string) => new Intl.DateTimeFormat('en-GB', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  timeZone: 'Europe/Prague',
-}).format(new Date(`${date}T12:00:00+02:00`))
 
 export default function App() {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -41,7 +34,8 @@ export default function App() {
     },
   ), [selectedDay.start, totalMinutes])
   const cursorMinutes = minutesFrom(selectedDay.start, activeTime.toISOString())
-  const showCursor = activeTime >= new Date(selectedDay.start) && activeTime <= new Date(selectedDay.end)
+  const effectiveFestivalDay = festivalDayAtTime(festivalDays, activeTime)
+  const showCursor = effectiveFestivalDay?.id === selectedDay.id
   const simulatedInputIsValid = !Number.isNaN(pragueLocalInputToDate(draftDateTime).getTime())
   const openTimeControls = () => {
     setDraftMode(timeState.mode)
@@ -58,7 +52,7 @@ export default function App() {
     dialogRef.current?.close()
   }
   return (
-    <main className={`app${liking.likeMode ? ' app--like-mode' : ''}`}>
+    <main className="app">
       <header className="compact-header">
         <div className="brand-mark">
           <img
@@ -73,38 +67,28 @@ export default function App() {
             B{__BUILD_NUMBER__} · {__BUILD_REVISION__}
           </small>
         </div>
-        <time className="header-date" dateTime={selectedDay.date}>
-          {dayDateLabel(selectedDay.date)}
-        </time>
+        <button className="time-control-button" type="button" aria-label="Open time controls" onClick={openTimeControls}>
+          {timeState.mode === 'simulated' && <b>SIM </b>}
+          {formatPragueDateTime(activeTime)}
+        </button>
         <nav className="day-selector" aria-label="Festival day">
           {festivalDays.map((day) => (
             <button
               type="button"
               key={day.id}
               className={day.id === selectedDay.id ? 'day-selector__day day-selector__day--active' : 'day-selector__day'}
+              aria-label={`${day.label}${effectiveFestivalDay?.id === day.id ? ', effective current festival day' : ''}`}
               aria-pressed={day.id === selectedDay.id}
               onClick={() => {
                 setSelectedDayId(day.id)
                 if (scrollerRef.current) scrollerRef.current.scrollTop = 0
               }}
             >
-              {day.label}
+              {effectiveFestivalDay?.id === day.id && <span aria-hidden="true">★ </span>}
+              {day.label.slice(0, 3).toUpperCase()}
             </button>
           ))}
         </nav>
-        <button
-          className={`like-mode-button${liking.likeMode ? ' like-mode-button--active' : ''}`}
-          type="button"
-          aria-label={liking.likeMode ? 'Exit Like Mode' : 'Enter Like Mode'}
-          aria-pressed={liking.likeMode}
-          onClick={liking.toggleLikeMode}
-        >
-          <span aria-hidden="true">{liking.likeMode ? '♥' : '♡'}</span>
-        </button>
-        <button className="time-control-button" type="button" aria-label="Open time controls" onClick={openTimeControls}>
-          {timeState.mode === 'simulated' && <b>SIM · </b>}
-          {formatPragueDateTime(activeTime)}
-        </button>
       </header>
       <div className="safe-area-content">
         <div className="timetable-scroll" aria-label={`${selectedDay.label} timetable`} ref={scrollerRef}>
