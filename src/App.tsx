@@ -73,10 +73,9 @@ export default function App() {
             B{__BUILD_NUMBER__} · {__BUILD_REVISION__}
           </small>
         </div>
-        <div className="header-title">
-          <strong>Let It Roll 2026</strong>
-          <span>{dayDateLabel(selectedDay.date)}</span>
-        </div>
+        <time className="header-date" dateTime={selectedDay.date}>
+          {dayDateLabel(selectedDay.date)}
+        </time>
         <nav className="day-selector" aria-label="Festival day">
           {festivalDays.map((day) => (
             <button
@@ -216,7 +215,9 @@ export default function App() {
                       }}
                     >
                       <span className="performance-content">
-                        <time>{formatTime(performance.start)}</time>
+                        <time>
+                          {formatTime(performance.start)} – {formatTime(performance.end)}
+                        </time>
                         <strong>{performance.artist}</strong>
                         <span className="visually-hidden">{statusLabel}</span>
                       </span>

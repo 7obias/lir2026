@@ -69,9 +69,12 @@ body { background: #07080c; overflow-x: hidden }
   white-space: nowrap;
 }
 
-.header-title { min-width: 0; display: flex; align-items: baseline; gap: 7px }
-.header-title strong { font-size: 11px; letter-spacing: .02em }
-.header-title span { font-size: 9px; color: #d8dae0 }
+.header-date {
+  min-width: 0;
+  color: #d8dae0;
+  font-size: 9px;
+  white-space: nowrap;
+}
 
 .day-selector {
   min-width: 0;
@@ -391,6 +394,7 @@ body { background: #07080c; overflow-x: hidden }
   font-size: var(--performance-time-font-size);
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .performance strong {
@@ -453,7 +457,7 @@ body { background: #07080c; overflow-x: hidden }
 @media (orientation: portrait) and (max-width: 700px) {
   .timetable { min-width: var(--portrait-min-width) }
   .compact-header { flex-wrap: wrap; padding-block: 4px }
-  .header-title { flex: 1 1 auto }
+  .header-date { flex: 1 1 auto }
   .time-control-button { flex: 0 0 auto }
 }
 
@@ -464,8 +468,7 @@ body { background: #07080c; overflow-x: hidden }
 
 @media (orientation: landscape) and (max-width: 720px) {
   .header-logo { width: 18px; height: 18px; max-width: 18px; max-height: 18px }
-  .header-title span { display: none }
-  .header-title strong { font-size: 10px }
+  .header-date { display: none }
   .build-id { font-size: 6px }
   .day-selector__day { padding-inline: 4px; font-size: 7px }
   .time-control-button { font-size: 8px }
