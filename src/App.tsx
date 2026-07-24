@@ -9,11 +9,13 @@ import { mapStageLocationsById, type MapStageLocation } from './data/mapStageLoc
 import { useStageMapTap } from './useStageMapTap'
 import { useSelectedDay } from './useSelectedDay'
 import { openArtistImageSearch, useArtistSearchMode } from './useArtistSearchMode'
+import { matchingPerformanceIds, normalizeTimetableSearch } from './timetableSearch'
 
 const performanceIds = new Set(allPerformances.map(({ id }) => id))
 
 export default function App() {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
   const timelineBodyRef = useRef<HTMLDivElement>(null)
   const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
@@ -22,6 +24,7 @@ export default function App() {
   const { selectedDayId, setSelectedDayId } = useSelectedDay(festivalDays)
   const selectedDay = festivalDays.find(({ id }) => id === selectedDayId) ?? festivalDays[0]
   const [mapStage, setMapStage] = useState<MapStageLocation>()
+  const [searchQuery, setSearchQuery] = useState('')
   const stageMapTap = useStageMapTap((stageId) => setMapStage(mapStageLocationsById.get(stageId)))
   const { activeTime, timeState, setTimeState, activateLive } = useActiveTime()
   const [draftMode, setDraftMode] = useState<TimeMode>(timeState.mode)
@@ -39,6 +42,12 @@ export default function App() {
   const effectiveFestivalDay = festivalDayAtTime(festivalDays, activeTime)
   const showCursor = effectiveFestivalDay?.id === selectedDay.id
   const simulatedInputIsValid = !Number.isNaN(pragueLocalInputToDate(draftDateTime).getTime())
+  const normalizedSearchQuery = normalizeTimetableSearch(searchQuery)
+  const searchIsActive = normalizedSearchQuery.length > 0
+  const searchMatches = useMemo(
+    () => matchingPerformanceIds(selectedDay.performances, selectedDay.stages, searchQuery),
+    [searchQuery, selectedDay.performances, selectedDay.stages],
+  )
   const openTimeControls = () => {
     setDraftMode(timeState.mode)
     setDraftDateTime(timeState.simulatedDateTime ?? '2026-07-30T22:00')
@@ -79,10 +88,50 @@ export default function App() {
             />
             <small
               className="build-id"
+              title={`Commit ${__BUILD_REVISION__}`}
               aria-label={`Application build ${__BUILD_NUMBER__}, commit ${__BUILD_REVISION__}`}
             >
-              B{__BUILD_NUMBER__} · {__BUILD_REVISION__}
+              B{__BUILD_NUMBER__}
             </small>
+          </div>
+          <div className="header-search">
+            <label className="visually-hidden" htmlFor="artist-search">Search artists</label>
+            <input
+              id="artist-search"
+              ref={searchInputRef}
+              type="search"
+              value={searchQuery}
+              placeholder="Search"
+              autoComplete="off"
+              spellCheck={false}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== 'Escape') return
+                if (searchQuery) setSearchQuery('')
+                else event.currentTarget.blur()
+              }}
+            />
+            {searchIsActive && (
+              <span className="header-search__count" aria-hidden="true">{searchMatches.size}</span>
+            )}
+            {searchQuery && (
+              <button
+                className="header-search__clear"
+                type="button"
+                aria-label="Clear search"
+                onClick={() => {
+                  setSearchQuery('')
+                  searchInputRef.current?.focus()
+                }}
+              >
+                ×
+              </button>
+            )}
+            <span className="visually-hidden" role="status" aria-live="polite">
+              {searchIsActive
+                ? `${searchMatches.size} matching performance${searchMatches.size === 1 ? '' : 's'}`
+                : ''}
+            </span>
           </div>
           <button className="time-control-button" type="button" aria-label="Open time controls" onClick={openTimeControls}>
             {timeState.mode === 'simulated' && <b>SIM </b>}
@@ -211,10 +260,15 @@ export default function App() {
                     ? 'Playing now'
                     : status === 'past' ? 'Past performance' : 'Upcoming performance'
                   const isLiked = liking.likedIds.has(performance.id)
+                  const searchClass = searchIsActive
+                    ? searchMatches.has(performance.id)
+                      ? ' performance--search-match'
+                      : ' performance--search-dimmed'
+                    : ''
                   return (
                     <button
                       type="button"
-                      className={`performance performance--${status}${isLiked ? ' performance--liked' : ''}`}
+                      className={`performance performance--${status}${isLiked ? ' performance--liked' : ''}${searchClass}`}
                       key={performance.id}
                       data-performance-id={performance.id}
                       style={{

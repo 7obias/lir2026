@@ -88,6 +88,76 @@ body { background: #07080c; overflow-x: hidden }
   white-space: nowrap;
 }
 
+.header-search {
+  position: relative;
+  flex: 1 1 130px;
+  width: clamp(58px, 15vw, 150px);
+  min-width: 58px;
+  max-width: 150px;
+}
+
+.header-search input {
+  width: 100%;
+  height: 26px;
+  padding: 2px 42px 2px 7px;
+  border: 1px solid #343844;
+  border-radius: 3px;
+  outline: 0;
+  color: #f0f1f4;
+  background: #151820;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  appearance: none;
+}
+
+.header-search input::placeholder {
+  color: #858995;
+  font-size: 10px;
+}
+
+.header-search input:focus-visible {
+  border-color: #f2f3f6;
+  box-shadow: 0 0 0 1px #f2f3f6;
+}
+
+.header-search input::-webkit-search-cancel-button { display: none }
+
+.header-search__count {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  color: #9296a2;
+  font-size: 8px;
+  line-height: 1;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.toolbar-content .header-search__clear {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 2px;
+  width: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  color: #c7cad2;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.header-search__clear:focus-visible {
+  outline: 1px solid #fff;
+  outline-offset: -2px;
+}
+
 .day-selector {
   min-width: 0;
   display: flex;
@@ -393,6 +463,18 @@ body { background: #07080c; overflow-x: hidden }
   color: #fff;
 }
 
+.performance--search-match {
+  z-index: 5;
+}
+
+.performance.performance--search-dimmed {
+  border-color: #42444b;
+  border-left-color: #4a4c54;
+  background: #202228;
+  opacity: .2;
+  filter: grayscale(100%);
+}
+
 .performance-content {
   display: block;
   min-width: 0;
@@ -488,6 +570,13 @@ body { background: #07080c; overflow-x: hidden }
 @media (orientation: landscape) and (max-width: 720px) {
   .header-logo { width: 18px; height: 18px; max-width: 18px; max-height: 18px }
   .build-id { font-size: 6px }
+  .toolbar-content { gap: 4px }
+  .header-search {
+    flex-basis: 72px;
+    width: clamp(52px, 12vw, 90px);
+    min-width: 52px;
+  }
+  .header-search input { height: 24px }
   .like-mode-button,
   .artist-search-button { width: 26px; min-height: 24px; font-size: 15px }
   .day-selector__day { padding-inline: 4px; font-size: 7px }
