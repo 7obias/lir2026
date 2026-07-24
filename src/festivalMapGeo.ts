@@ -107,7 +107,7 @@ const maximumSiteSeparation = (points: FestivalMapCalibrationPoint[]) => {
 export const calculateFestivalMapTransform = (
   allPoints: FestivalMapCalibrationPoint[],
 ): FestivalMapTransform | undefined => {
-  const points = allPoints.filter((point) => !point.excluded)
+  const points = allPoints.filter((point) => point.enabled !== false && !point.excluded)
   if (points.length < 2) return undefined
   const latitudeOrigin = points.reduce((sum, point) => sum + point.latitude, 0) / points.length
   const longitudeOrigin = points.reduce((sum, point) => sum + point.longitude, 0) / points.length
@@ -173,7 +173,7 @@ export const calibrationQuality = (
   points: FestivalMapCalibrationPoint[],
   transform = calculateFestivalMapTransform(points),
 ): CalibrationQuality => {
-  const activePoints = points.filter((point) => !point.excluded)
+  const activePoints = points.filter((point) => point.enabled !== false && !point.excluded)
   const activeCount = activePoints.length
   const clustered = activeCount >= 2 && maximumSiteSeparation(activePoints) < 75
   if (activeCount < 2 || !transform) {

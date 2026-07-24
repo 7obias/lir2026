@@ -1,10 +1,19 @@
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ClipboardEvent,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+} from 'react'
 import type { MapStageLocation } from './data/mapStageLocations'
 import { useLiveMapPosition } from './useLiveMapPosition'
-import { calibrationAdminEnabled, useMapCalibration } from './useMapCalibration'
+import { useMapCalibration } from './useMapCalibration'
 import { MapCalibrationPanel } from './MapCalibrationPanel'
-import { useCalibrationGps, type StabilizedGpsReading } from './useCalibrationGps'
+import { useCalibrationGps } from './useCalibrationGps'
 import type { MapPoint } from './festivalMapGeo'
+import { parseCoordinatePair, validLatitude, validLongitude } from './calibrationCoordinates'
 
 type FestivalMapProps = {
   location?: MapStageLocation
@@ -12,19 +21,32 @@ type FestivalMapProps = {
 }
 
 type CalibrationFlow = 'idle' | 'capturing' | 'placing' | 'confirming'
+type PendingCalibrationCoordinates = {
+  latitude: number
+  longitude: number
+  source: 'current-location' | 'manual'
+  accuracyMeters?: number
+}
 
 export function FestivalMap({ location, onClose }: FestivalMapProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
+  const coordinateDialogRef = useRef<HTMLDialogElement>(null)
   const calibration = useMapCalibration()
   const tracking = useLiveMapPosition(Boolean(location), calibration.transform)
   const calibrationGps = useCalibrationGps()
   const [calibrationOpen, setCalibrationOpen] = useState(false)
   const [calibrationFlow, setCalibrationFlow] = useState<CalibrationFlow>('idle')
-  const [pendingReading, setPendingReading] = useState<(StabilizedGpsReading & { label: string })>()
+  const [pendingReading, setPendingReading] = useState<PendingCalibrationCoordinates>()
   const [placementPreview, setPlacementPreview] = useState<MapPoint>()
-  const [calibrationLabel, setCalibrationLabel] = useState('')
+  const [useCurrentLocation, setUseCurrentLocation] = useState(false)
+  const [latitudeInput, setLatitudeInput] = useState('')
+  const [longitudeInput, setLongitudeInput] = useState('')
+  const [coordinateSource, setCoordinateSource] = useState<'current-location' | 'manual'>('manual')
+  const [capturedAccuracy, setCapturedAccuracy] = useState<number>()
+  const [coordinateLoading, setCoordinateLoading] = useState(false)
+  const [coordinateError, setCoordinateError] = useState('')
   const [simulationActive, setSimulationActive] = useState(false)
   const [simulatedPosition, setSimulatedPosition] = useState<MapPoint>()
   const mapTapRef = useRef<{
@@ -34,7 +56,7 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
     moved: boolean
   } | undefined>(undefined)
   const dragRef = useRef<{ id: string } | undefined>(undefined)
-  const adminEnabled = calibrationAdminEnabled()
+  const coordinateRequestRef = useRef(0)
 
   const centreStage = () => {
     const viewport = viewportRef.current
@@ -110,36 +132,101 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
 
   const cancelCalibrationFlow = () => {
     calibrationGps.cancel()
+    coordinateDialogRef.current?.close()
     setCalibrationFlow('idle')
     setPendingReading(undefined)
     setPlacementPreview(undefined)
-    setCalibrationLabel('')
+    setCoordinateLoading(false)
+    setCoordinateError('')
+    coordinateRequestRef.current += 1
   }
 
   const beginCalibrationFlow = () => {
     tracking.stop()
     setSimulationActive(false)
     setSimulatedPosition(undefined)
-    setCalibrationOpen(true)
     setPendingReading(undefined)
     setPlacementPreview(undefined)
-    setCalibrationLabel('')
-    setCalibrationFlow('capturing')
-    calibrationGps.start()
+    setUseCurrentLocation(false)
+    setLatitudeInput('')
+    setLongitudeInput('')
+    setCoordinateSource('manual')
+    setCapturedAccuracy(undefined)
+    setCoordinateError('')
+    setCoordinateLoading(false)
+    setCalibrationFlow('idle')
+    coordinateDialogRef.current?.showModal()
   }
 
-  const acceptCalibrationReading = (acceptedReading?: StabilizedGpsReading) => {
-    const reading = acceptedReading ?? calibrationGps.accept()
-    if (!reading) return
-    setPendingReading({ ...reading, label: calibrationLabel })
+  const captureCurrentCoordinates = () => {
+    const requestId = coordinateRequestRef.current + 1
+    coordinateRequestRef.current = requestId
+    setCoordinateLoading(true)
+    setCoordinateError('')
+    if (!navigator.geolocation) {
+      setUseCurrentLocation(false)
+      setCoordinateSource('manual')
+      setCoordinateLoading(false)
+      setCoordinateError('Current location is unavailable. Enter coordinates manually.')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        if (coordinateRequestRef.current !== requestId) return
+        setLatitudeInput(String(coords.latitude))
+        setLongitudeInput(String(coords.longitude))
+        setCapturedAccuracy(coords.accuracy)
+        setCoordinateSource('current-location')
+        setCoordinateLoading(false)
+      },
+      (error) => {
+        if (coordinateRequestRef.current !== requestId) return
+        setUseCurrentLocation(false)
+        setCoordinateSource('manual')
+        setCoordinateLoading(false)
+        setCoordinateError(error.code === error.PERMISSION_DENIED
+          ? 'Location permission was denied. Enter coordinates manually.'
+          : 'Current location is unavailable. Enter coordinates manually.')
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15_000 },
+    )
+  }
+
+  const cancelCoordinatePopup = () => {
+    coordinateRequestRef.current += 1
+    setCoordinateLoading(false)
+    setCoordinateError('')
+    coordinateDialogRef.current?.close()
+  }
+
+  const latitude = Number(latitudeInput.trim())
+  const longitude = Number(longitudeInput.trim())
+  const latitudeValid = validLatitude(latitudeInput)
+  const longitudeValid = validLongitude(longitudeInput)
+  const coordinatesValid = latitudeValid && longitudeValid
+
+  const pasteCoordinates = (event: ClipboardEvent<HTMLInputElement>) => {
+    const pair = parseCoordinatePair(event.clipboardData.getData('text'))
+    if (!pair) return
+    event.preventDefault()
+    setLatitudeInput(pair.latitude)
+    setLongitudeInput(pair.longitude)
+    setCoordinateSource('manual')
+    setUseCurrentLocation(false)
+    setCapturedAccuracy(undefined)
+  }
+
+  const acceptCoordinateInputs = () => {
+    if (!coordinatesValid) return
+    setPendingReading({
+      latitude,
+      longitude,
+      source: coordinateSource,
+      accuracyMeters: coordinateSource === 'current-location' ? capturedAccuracy : undefined,
+    })
+    coordinateDialogRef.current?.close()
     setCalibrationFlow('placing')
   }
-
-  useEffect(() => {
-    if (calibrationFlow === 'capturing' && calibrationGps.reading?.stable) {
-      acceptCalibrationReading()
-    }
-  }, [calibrationFlow, calibrationGps.reading?.stable])
 
   const saveCalibrationPoint = () => {
     if (!pendingReading || !placementPreview) return
@@ -149,13 +236,13 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
       longitude: pendingReading.longitude,
       accuracyMeters: pendingReading.accuracyMeters,
       ...placementPreview,
-      label: calibrationLabel.trim() || undefined,
+      source: pendingReading.source,
+      enabled: true,
       createdAt: new Date().toISOString(),
     })
     setCalibrationFlow('idle')
     setPendingReading(undefined)
     setPlacementPreview(undefined)
-    setCalibrationLabel('')
   }
 
   const startMarkerDrag = (event: PointerEvent<HTMLButtonElement>, id: string) => {
@@ -187,13 +274,6 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
         heading: 0,
       }
     : tracking.position
-  const calibrationButtonLabel = calibrationFlow === 'capturing'
-    ? 'Capturing GPS…'
-    : calibrationFlow === 'placing'
-      ? 'Tap position on map'
-      : calibrationFlow === 'confirming'
-        ? 'Confirm calibration point'
-        : 'Add calibration point'
   const calibrationStatus = calibration.quality.activeCount === 0
     ? 'Not calibrated'
     : calibration.quality.activeCount === 1
@@ -223,33 +303,29 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             {location && <span>{location.mapLabel}</span>}
           </div>
           <div className="map-toolbar-actions">
-            {adminEnabled && (
-              <>
-                <span className="map-calibration-status">{calibrationStatus}</span>
-                <button
-                  type="button"
-                  className="map-manage-calibration"
-                  disabled={calibrationFlow !== 'idle'}
-                  onClick={() => setCalibrationOpen(true)}
-                >
-                  Manage calibration
-                </button>
-                <button
-                  type="button"
-                  className={`map-calibrate-button${calibrationFlow !== 'idle' ? ' map-calibrate-button--active' : ''}`}
-                  aria-label={calibrationButtonLabel}
-                  disabled={calibrationFlow !== 'idle'}
-                  onClick={beginCalibrationFlow}
-                >
-                  <svg aria-hidden="true" viewBox="0 0 24 24">
-                    <path d="M12 21s6-5.6 6-12a6 6 0 1 0-12 0c0 6.4 6 12 6 12Z" />
-                    <path d="M12 6v6M9 9h6" />
-                  </svg>
-                  <span>{calibrationButtonLabel}</span>
-                  {calibration.quality.activeCount > 0 && <b>{calibration.quality.activeCount}</b>}
-                </button>
-              </>
-            )}
+            <span className="map-calibration-status">{calibrationStatus}</span>
+            <button
+              type="button"
+              className="map-manage-calibration"
+              disabled={calibrationFlow !== 'idle'}
+              onClick={() => setCalibrationOpen(true)}
+            >
+              Manage
+            </button>
+            <button
+              type="button"
+              className={`map-calibrate-button map-calibrate-button--icon${calibrationFlow !== 'idle' ? ' map-calibrate-button--active' : ''}`}
+              aria-label="Add map calibration point"
+              title="Add map calibration point"
+              disabled={calibrationFlow !== 'idle'}
+              onClick={beginCalibrationFlow}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5" />
+                <path d="M12 2v5M12 17v5M2 12h5M17 12h5" />
+              </svg>
+              {calibration.quality.activeCount > 0 && <b>{calibration.quality.activeCount}</b>}
+            </button>
             <button
               type="button"
               className={`map-location-button map-location-button--${tracking.status}`}
@@ -272,7 +348,7 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
               {tracking.status === 'acquiring' && <span className="map-location-spinner" />}
               {tracking.status === 'error' && <span className="map-location-warning">!</span>}
             </button>
-            {adminEnabled && calibrationFlow !== 'idle' && (
+            {calibrationFlow !== 'idle' && (
               <button type="button" className="map-calibration-cancel" onClick={cancelCalibrationFlow}>
                 Cancel
               </button>
@@ -280,6 +356,96 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             <button type="button" aria-label="Close festival map" onClick={close}>×</button>
           </div>
         </header>
+        <dialog
+          className="map-coordinate-dialog"
+          ref={coordinateDialogRef}
+          aria-labelledby="map-coordinate-title"
+          onClose={() => {
+            coordinateRequestRef.current += 1
+            setCoordinateLoading(false)
+          }}
+        >
+          <form method="dialog" onSubmit={(event) => event.preventDefault()}>
+            <h2 id="map-coordinate-title">Add map calibration point</h2>
+            <label className="map-coordinate-switch">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={useCurrentLocation}
+                onChange={(event) => {
+                  const enabled = event.target.checked
+                  setUseCurrentLocation(enabled)
+                  setCoordinateError('')
+                  if (enabled) captureCurrentCoordinates()
+                  else {
+                    coordinateRequestRef.current += 1
+                    setCoordinateLoading(false)
+                    setCoordinateSource('manual')
+                    setCapturedAccuracy(undefined)
+                  }
+                }}
+              />
+              Use current location
+            </label>
+            {coordinateLoading && <p className="map-coordinate-status" role="status">Acquiring current location…</p>}
+            {coordinateError && <p className="map-coordinate-error" role="alert">{coordinateError}</p>}
+            {capturedAccuracy !== undefined && (
+              <p className="map-coordinate-status">Reported accuracy: ±{capturedAccuracy.toFixed(1)} m</p>
+            )}
+            <label>
+              Latitude
+              <input
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                value={latitudeInput}
+                aria-invalid={latitudeInput !== '' && !latitudeValid}
+                aria-describedby={!latitudeValid && latitudeInput !== '' ? 'latitude-error' : undefined}
+                placeholder="50.522272"
+                onPaste={pasteCoordinates}
+                onChange={(event) => setLatitudeInput(event.target.value)}
+              />
+            </label>
+            {latitudeInput !== '' && !latitudeValid && (
+              <small id="latitude-error" className="map-coordinate-error">
+                Enter a finite latitude between −90 and 90.
+              </small>
+            )}
+            <label>
+              Longitude
+              <input
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                value={longitudeInput}
+                aria-invalid={longitudeInput !== '' && !longitudeValid}
+                aria-describedby={!longitudeValid && longitudeInput !== '' ? 'longitude-error' : undefined}
+                placeholder="13.646872"
+                onPaste={pasteCoordinates}
+                onChange={(event) => setLongitudeInput(event.target.value)}
+              />
+            </label>
+            {longitudeInput !== '' && !longitudeValid && (
+              <small id="longitude-error" className="map-coordinate-error">
+                Enter a finite longitude between −180 and 180.
+              </small>
+            )}
+            <small className="map-coordinate-hint">
+              You can paste “50.522272, 13.646872” into either field.
+            </small>
+            <div className="map-coordinate-actions">
+              <button type="button" onClick={cancelCoordinatePopup}>Cancel</button>
+              <button
+                type="button"
+                className="map-coordinate-ok"
+                disabled={!coordinatesValid || coordinateLoading}
+                onClick={acceptCoordinateInputs}
+              >
+                OK
+              </button>
+            </div>
+          </form>
+        </dialog>
         {!calibration.transform && calibrationFlow === 'idle' && (
           <p className="map-calibration-unavailable" role="status">
             Map not sufficiently calibrated · real position display unavailable
@@ -291,11 +457,8 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
           </p>
         )}
         {simulationActive && <p className="map-simulation-badge">SIMULATED GPS · tap map to move</p>}
-        {calibrationFlow === 'capturing' && (
-          <p className="map-placement-banner" role="status">Capturing current GPS position…</p>
-        )}
         {calibrationFlow === 'placing' && (
-          <p className="map-placement-banner" role="status">Now tap your exact position on the festival map</p>
+          <p className="map-placement-banner" role="status">Tap the matching position on the festival map</p>
         )}
         {calibrationFlow === 'confirming' && (
           <p className="map-placement-banner" role="status">Confirm the selected calibration point</p>
@@ -360,7 +523,7 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
                       )}
                       <button
                         type="button"
-                        className={`map-calibration-marker${point.excluded ? ' map-calibration-marker--excluded' : ''}`}
+                        className={`map-calibration-marker${point.enabled === false || point.excluded ? ' map-calibration-marker--excluded' : ''}`}
                         style={{ left: `${point.xPercent}%`, top: `${point.yPercent}%` }}
                         aria-label={`Calibration point ${index + 1}${point.label ? `: ${point.label}` : ''}. Drag to adjust map position.`}
                         onPointerDown={(event) => startMarkerDrag(event, point.id)}
@@ -413,6 +576,30 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             )}
           </div>
         </div>
+        {calibrationFlow === 'confirming' && pendingReading && placementPreview && (
+          <section className="map-calibration-confirmation" aria-label="Confirm map calibration point">
+            <strong>Confirm calibration point</strong>
+            <span>
+              {pendingReading.latitude.toFixed(6)}, {pendingReading.longitude.toFixed(6)}
+              {pendingReading.accuracyMeters !== undefined
+                ? ` · accuracy ±${pendingReading.accuracyMeters.toFixed(1)} m`
+                : ' · manual coordinates'}
+            </span>
+            <div>
+              <button type="button" onClick={cancelCalibrationFlow}>Cancel</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPlacementPreview(undefined)
+                  setCalibrationFlow('placing')
+                }}
+              >
+                Choose another point
+              </button>
+              <button type="button" className="map-coordinate-ok" onClick={saveCalibrationPoint}>Save</button>
+            </div>
+          </section>
+        )}
         {calibrationOpen && (
           <MapCalibrationPanel
             points={calibration.points}
@@ -420,13 +607,13 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
             quality={calibration.quality}
             storageMessage={calibration.storageMessage}
             canUndo={calibration.canUndo}
-            flow={calibrationFlow}
+            flow="idle"
             gps={calibrationGps}
-            label={calibrationLabel}
-            hasPlacementPreview={Boolean(placementPreview)}
+            label=""
+            hasPlacementPreview={false}
             simulationActive={simulationActive}
-            onLabelChange={setCalibrationLabel}
-            onAcceptCalibrationReading={acceptCalibrationReading}
+            onLabelChange={() => {}}
+            onAcceptCalibrationReading={() => {}}
             onSaveCalibrationPoint={saveCalibrationPoint}
             onChooseAnotherPoint={() => {
               setPlacementPreview(undefined)
@@ -437,6 +624,8 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
               latitude: reading.latitude,
               longitude: reading.longitude,
               accuracyMeters: reading.accuracyMeters,
+              source: 'current-location',
+              enabled: true,
               createdAt: new Date().toISOString(),
             })}
             onPatchPoint={calibration.patchPoint}

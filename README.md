@@ -55,18 +55,17 @@ fit. The interface never claims surveyed or centimetre-level accuracy.
 
 ## Field map calibration
 
-Calibration editing is an administrator/development tool, not an ordinary festival-user
-control. It appears automatically during local Vite development. In a production build,
-open the map from a stage and add `?mapCalibration=1` to the application URL to expose
-the **Add calibration point** and **Manage calibration** controls beside the location
-button.
+The map toolbar always shows a crosshairs button beside the location button. It opens a
+compact coordinate form where coordinates can be entered manually, pasted as
+`latitude, longitude`, or populated from the browser’s current location. Captured
+coordinates remain editable before continuing.
 
 The field workflow is:
 
-1. Stand at an identifiable landmark and choose **Use my current position**.
-2. Wait while several high-accuracy GPS samples are stabilized for at least five seconds.
-3. Accept the reading, then deliberately tap the corresponding point on the illustrated map.
-4. Review the crosshair preview and explicitly save it, or choose another map point.
+1. Stand at an identifiable landmark and press the crosshairs button.
+2. Enter coordinates or enable **Use current location**, then press **OK**.
+3. Deliberately tap the corresponding point on the illustrated map.
+4. Review the coordinate and crosshair preview, then explicitly save it or choose another point.
 5. Repeat at three or more widely separated landmarks (four or more are recommended).
 6. Review recorded-versus-predicted markers, residual errors, and flagged outliers.
 7. Drag points to fine-tune them, replace GPS readings, exclude or delete bad points,

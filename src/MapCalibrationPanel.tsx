@@ -224,7 +224,8 @@ export function MapCalibrationPanel({
                 />
               </label>
               <span>
-                GPS ±{point.accuracyMeters.toFixed(1)} m · {new Date(point.createdAt).toLocaleString()}
+                GPS {point.accuracyMeters === undefined ? 'accuracy unknown' : `±${point.accuracyMeters.toFixed(1)} m`}
+                {' · '}{new Date(point.createdAt).toLocaleString()}
                 {' · '}residual {metres(residual?.errorMeters)}
               </span>
               {residual?.likelyIncorrect && <em>Likely incorrect point</em>}
@@ -232,8 +233,11 @@ export function MapCalibrationPanel({
                 <label>
                   <input
                     type="checkbox"
-                    checked={!point.excluded}
-                    onChange={(event) => onPatchPoint(point.id, { excluded: !event.target.checked })}
+                    checked={point.enabled !== false && !point.excluded}
+                    onChange={(event) => onPatchPoint(point.id, {
+                      enabled: event.target.checked,
+                      excluded: false,
+                    })}
                   />
                   Included
                 </label>

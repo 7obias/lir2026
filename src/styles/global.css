@@ -562,6 +562,19 @@ footer {
   stroke-width: 1.8;
 }
 
+.map-toolbar .map-calibrate-button--icon {
+  position: relative;
+  width: 30px;
+  padding: 0;
+  justify-content: center;
+}
+
+.map-toolbar .map-calibrate-button--icon b {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+}
+
 .map-toolbar .map-calibrate-button b {
   min-width: 14px;
   height: 14px;
@@ -714,6 +727,99 @@ footer {
   line-height: 1.2;
   text-align: center;
   pointer-events: none;
+}
+
+.map-coordinate-dialog {
+  width: min(310px, calc(100vw - 24px));
+  max-height: calc(100dvh - 20px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid #515661;
+  border-radius: 5px;
+  color: #f4f5f7;
+  background: #15171e;
+}
+
+.map-coordinate-dialog::backdrop { background: rgb(0 0 0 / .7) }
+.map-coordinate-dialog form { display: grid; gap: 6px; padding: 10px }
+.map-coordinate-dialog h2 { margin: 0 0 2px; font-size: 13px }
+.map-coordinate-dialog label { display: grid; gap: 3px; color: #c6c9d0; font-size: 9px }
+.map-coordinate-dialog input[type="text"] {
+  min-height: 34px;
+  padding: 5px 7px;
+  border: 1px solid #4b505b;
+  border-radius: 3px;
+  color: #fff;
+  background: #090b10;
+  font: 12px/1.2 Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.map-coordinate-dialog input[aria-invalid="true"] { border-color: #e87567 }
+.map-coordinate-dialog .map-coordinate-switch {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  color: #f0f1f3;
+}
+
+.map-coordinate-switch input { width: 18px; height: 18px; margin: 0 }
+.map-coordinate-status,
+.map-coordinate-error,
+.map-coordinate-hint { margin: 0; font-size: 8px; line-height: 1.25 }
+.map-coordinate-status { color: #a9ddea }
+.map-coordinate-error { color: #ff9c8d }
+.map-coordinate-hint { color: #9da1aa }
+.map-coordinate-actions { display: flex; justify-content: flex-end; gap: 5px; margin-top: 3px }
+.map-coordinate-dialog button,
+.map-calibration-confirmation button {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid #474c57;
+  border-radius: 3px;
+  color: #f5f6f8;
+  background: #252831;
+  font: 9px/1 Arial, sans-serif;
+}
+
+.map-coordinate-dialog button:disabled { opacity: .4 }
+.map-coordinate-dialog .map-coordinate-ok,
+.map-calibration-confirmation .map-coordinate-ok {
+  border-color: #56bfd6;
+  color: #071115;
+  background: #66d1e7;
+  font-weight: 800;
+}
+
+.map-calibration-confirmation {
+  position: absolute;
+  z-index: 18;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  gap: 5px;
+  max-width: min(390px, calc(100vw - 24px));
+  padding: 7px;
+  border: 1px solid #e8c85d;
+  border-radius: 4px;
+  color: #f4f5f7;
+  background: rgb(18 20 26 / .96);
+  box-shadow: 0 2px 9px #000;
+  font-size: 9px;
+}
+
+.map-calibration-confirmation > span {
+  color: #c7cad1;
+  font-variant-numeric: tabular-nums;
+}
+
+.map-calibration-confirmation > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 .map-simulation-badge {

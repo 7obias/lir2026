@@ -13,21 +13,27 @@ const parseCalibration = (value: string): FestivalMapCalibrationPoint[] => {
   if (parsed.mapAsset !== '/maps/lir26-map.jpg' || !Array.isArray(parsed.points)) {
     throw new Error('This is not a LIR 2026 map calibration file')
   }
+  const normalized: FestivalMapCalibrationPoint[] = []
   for (const point of parsed.points) {
     if (
       !point || typeof point.id !== 'string'
       || !Number.isFinite(point.latitude) || !Number.isFinite(point.longitude)
-      || !Number.isFinite(point.accuracyMeters)
+      || (point.accuracyMeters !== undefined && !Number.isFinite(point.accuracyMeters))
       || !Number.isFinite(point.xPercent) || !Number.isFinite(point.yPercent)
       || point.latitude! < -90 || point.latitude! > 90
       || point.longitude! < -180 || point.longitude! > 180
-      || point.accuracyMeters! < 0
+      || (point.accuracyMeters !== undefined && point.accuracyMeters < 0)
       || point.xPercent! < 0 || point.xPercent! > 100
       || point.yPercent! < 0 || point.yPercent! > 100
       || typeof point.createdAt !== 'string'
     ) throw new Error('Calibration file contains an invalid point')
+    normalized.push({
+      ...point,
+      source: point.source === 'current-location' ? 'current-location' : 'manual',
+      enabled: point.enabled ?? !point.excluded,
+    } as FestivalMapCalibrationPoint)
   }
-  return parsed.points as FestivalMapCalibrationPoint[]
+  return normalized
 }
 
 const initialPoints = () => {
@@ -37,11 +43,6 @@ const initialPoints = () => {
   } catch {
     return bundledFestivalMapCalibration.points
   }
-}
-
-export const calibrationAdminEnabled = () => {
-  const parameters = new URLSearchParams(window.location.search)
-  return import.meta.env.DEV || parameters.get('mapCalibration') === '1'
 }
 
 export function useMapCalibration() {
