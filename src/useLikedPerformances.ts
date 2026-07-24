@@ -68,6 +68,16 @@ export function useLikedPerformances(
     setLikeMode((active) => !active)
   }
 
+  const activateLikeMode = () => {
+    pointersRef.current.clear()
+    setLikeMode(true)
+  }
+
+  const deactivateLikeMode = () => {
+    pointersRef.current.clear()
+    setLikeMode(false)
+  }
+
   const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>, performanceId: string) => {
     if (!likeMode) return
     pointersRef.current.set(event.pointerId, {
@@ -122,6 +132,8 @@ export function useLikedPerformances(
     likeMode,
     likedIds,
     toggleLikeMode,
+    activateLikeMode,
+    deactivateLikeMode,
     onPointerDown,
     onPointerMove,
     onPointerUp,

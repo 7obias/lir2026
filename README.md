@@ -41,6 +41,7 @@ from that single local source before compiling the application.
 - Past/current/upcoming performance states based on the active timetable time
 - Timetable-only two-finger zoom from 1× to 2.5× with sticky stage and time headers
 - Persistent set liking through the explicit Like Mode
+- Mutually exclusive Artist Search Mode opens encoded Google Images DJ searches
 - Stage headings open the locally bundled festival map at the selected stage
 - Optional, permission-gated live position and compass direction on the festival map
 - iPhone landscape safe-area insets for the sticky time rail

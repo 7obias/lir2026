@@ -126,7 +126,8 @@ body { background: #07080c; overflow-x: hidden }
   white-space: nowrap;
 }
 
-.like-mode-button {
+.like-mode-button,
+.artist-search-button {
   flex: 0 0 auto;
   width: 28px;
   min-height: 26px;
@@ -147,8 +148,17 @@ body { background: #07080c; overflow-x: hidden }
   box-shadow: inset 0 0 0 1px #7c3548;
 }
 
+.artist-search-button--active {
+  border-color: #79d7eb;
+  color: #071015;
+  background: #86dff0;
+  box-shadow: inset 0 0 0 1px #d5f8ff;
+  font-weight: 800;
+}
+
 .time-control-button b { color: #e8c85d; font-size: 8px }
 .like-mode-button:focus-visible,
+.artist-search-button:focus-visible,
 .day-selector__day:focus-visible,
 .time-control-button:focus-visible,
 .time-dialog button:focus-visible,
@@ -478,12 +488,14 @@ body { background: #07080c; overflow-x: hidden }
 @media (orientation: landscape) and (max-width: 720px) {
   .header-logo { width: 18px; height: 18px; max-width: 18px; max-height: 18px }
   .build-id { font-size: 6px }
-  .like-mode-button { width: 26px; min-height: 24px; font-size: 15px }
+  .like-mode-button,
+  .artist-search-button { width: 26px; min-height: 24px; font-size: 15px }
   .day-selector__day { padding-inline: 4px; font-size: 7px }
   .time-control-button { font-size: 8px }
 }
 
-.app--like-mode .performance { cursor: pointer }
+.app--like-mode .performance,
+.app--artist-search-mode .performance { cursor: pointer }
 
 .map-dialog {
   width: 100vw;

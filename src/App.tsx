@@ -8,6 +8,7 @@ import { FestivalMap } from './FestivalMap'
 import { mapStageLocationsById, type MapStageLocation } from './data/mapStageLocations'
 import { useStageMapTap } from './useStageMapTap'
 import { useSelectedDay } from './useSelectedDay'
+import { artistImageSearchUrl, useArtistSearchMode } from './useArtistSearchMode'
 
 const performanceIds = new Set(allPerformances.map(({ id }) => id))
 
@@ -17,6 +18,7 @@ export default function App() {
   const timelineBodyRef = useRef<HTMLDivElement>(null)
   const zoom = useTimetableZoom(timelineBodyRef, scrollerRef)
   const liking = useLikedPerformances(performanceIds, zoom.shouldSuppressClick)
+  const artistSearch = useArtistSearchMode(zoom.shouldSuppressClick)
   const { selectedDayId, setSelectedDayId } = useSelectedDay(festivalDays)
   const selectedDay = festivalDays.find(({ id }) => id === selectedDayId) ?? festivalDays[0]
   const [mapStage, setMapStage] = useState<MapStageLocation>()
@@ -51,8 +53,22 @@ export default function App() {
     activateLive()
     dialogRef.current?.close()
   }
+  const toggleLikeMode = () => {
+    if (liking.likeMode) liking.deactivateLikeMode()
+    else {
+      artistSearch.deactivateArtistSearchMode()
+      liking.activateLikeMode()
+    }
+  }
+  const toggleArtistSearchMode = () => {
+    if (artistSearch.artistSearchMode) artistSearch.deactivateArtistSearchMode()
+    else {
+      liking.deactivateLikeMode()
+      artistSearch.activateArtistSearchMode()
+    }
+  }
   return (
-    <main className={`app${liking.likeMode ? ' app--like-mode' : ''}`}>
+    <main className={`app${liking.likeMode ? ' app--like-mode' : ''}${artistSearch.artistSearchMode ? ' app--artist-search-mode' : ''}`}>
       <header className="compact-header">
         <div className="toolbar-content">
           <div className="brand-mark">
@@ -77,9 +93,18 @@ export default function App() {
             type="button"
             aria-label={liking.likeMode ? 'Exit Like Mode' : 'Enter Like Mode'}
             aria-pressed={liking.likeMode}
-            onClick={liking.toggleLikeMode}
+            onClick={toggleLikeMode}
           >
             <span aria-hidden="true">{liking.likeMode ? '♥' : '♡'}</span>
+          </button>
+          <button
+            className={`artist-search-button${artistSearch.artistSearchMode ? ' artist-search-button--active' : ''}`}
+            type="button"
+            aria-label="Artist search mode"
+            aria-pressed={artistSearch.artistSearchMode}
+            onClick={toggleArtistSearchMode}
+          >
+            <span aria-hidden="true">?</span>
           </button>
           <nav className="day-selector" aria-label="Festival day">
             {festivalDays.map((day) => (
@@ -198,14 +223,29 @@ export default function App() {
                       } as CSSProperties}
                       aria-pressed={isLiked}
                       aria-label={`${performance.artist}, ${formatTime(performance.start)} to ${formatTime(performance.end)}, ${stage.name}. ${statusLabel}. ${isLiked ? 'Liked' : 'Not liked'}`}
-                      onPointerDown={(event) => liking.onPointerDown(event, performance.id)}
-                      onPointerMove={liking.onPointerMove}
-                      onPointerUp={liking.onPointerUp}
-                      onPointerCancel={liking.onPointerCancel}
+                      onPointerDown={(event) => {
+                        liking.onPointerDown(event, performance.id)
+                        artistSearch.onPointerDown(event, performance.id, performance.artist)
+                      }}
+                      onPointerMove={(event) => {
+                        liking.onPointerMove(event)
+                        artistSearch.onPointerMove(event)
+                      }}
+                      onPointerUp={(event) => {
+                        liking.onPointerUp(event)
+                        artistSearch.onPointerUp(event)
+                      }}
+                      onPointerCancel={(event) => {
+                        liking.onPointerCancel(event)
+                        artistSearch.onPointerCancel(event)
+                      }}
                       onKeyDown={(event) => {
                         if (liking.likeMode && (event.key === 'Enter' || event.key === ' ')) {
                           event.preventDefault()
                           liking.toggleLiked(performance.id)
+                        } else if (artistSearch.artistSearchMode && (event.key === 'Enter' || event.key === ' ')) {
+                          event.preventDefault()
+                          window.open(artistImageSearchUrl(performance.artist), '_blank', 'noopener,noreferrer')
                         }
                       }}
                     >
