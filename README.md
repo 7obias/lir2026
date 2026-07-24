@@ -51,11 +51,12 @@ button requests GPS and compass access only after it is pressed. Position and di
 are processed only in the browser, are never stored or transmitted, and stop updating
 when the map closes.
 
-The illustrated map has no authoritative geographic coordinate system and the app
-ships with **no guessed calibration points**. Real GPS placement remains unavailable
-until field calibration has supplied at least two active points; two points are clearly
-marked provisional, while three or more well-separated points use a local-metre affine
-fit. The interface never claims surveyed or centimetre-level accuracy.
+The illustrated map uses the verified factory calibration stored at
+`public/maps/calibration.json`. On first launch it is copied into local browser
+storage; an existing local calibration always takes precedence. Users can edit,
+delete, disable, import, export, or restore the points from that immutable factory
+default. Two active points use a provisional fit, while three or more well-separated
+points use a local-metre affine fit.
 
 ## Field map calibration
 
@@ -76,9 +77,9 @@ The field workflow is:
    and export the verified JSON.
 
 Calibration is stored separately in local storage under
-`lir2026.map-calibration.v1`. It can be exported and imported as JSON; only reviewed,
-field-verified points should later be committed to
-`src/data/festivalMapCalibration.ts`. Resetting all points requires confirmation.
+`lir2026.map-calibration.v1`. It can be exported and imported as JSON. Resetting all
+points and restoring the bundled defaults both require confirmation. To update the
+factory calibration for a future map, replace `public/maps/calibration.json`.
 GPS simulation is a separate visual test mode and never creates calibration points.
 Its latitude and longitude dialog accepts the same Google Maps paste formats as
 calibration. The entered geographic coordinate is projected through the active

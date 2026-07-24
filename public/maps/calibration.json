@@ -1,0 +1,35 @@
+{
+  "mapAsset": "/maps/lir26-map.jpg",
+  "points": [
+    {
+      "id": "ed03a4e3-e63c-4596-9164-5c2e758ce602",
+      "latitude": 50.5248719,
+      "longitude": 13.6446192,
+      "xPercent": 61.54814814814815,
+      "yPercent": 43.45020576131688,
+      "source": "manual",
+      "enabled": true,
+      "createdAt": "2026-07-24T06:41:01.160Z"
+    },
+    {
+      "id": "89956626-c2d5-4d48-8ad2-62d9d2914e9e",
+      "latitude": 50.5222627,
+      "longitude": 13.6468666,
+      "xPercent": 67.37037037037037,
+      "yPercent": 62.84115226337449,
+      "source": "manual",
+      "enabled": true,
+      "createdAt": "2026-07-24T06:42:55.848Z"
+    },
+    {
+      "id": "d3f22a10-1eb8-4122-a02e-89522a3f566e",
+      "latitude": 50.5279791,
+      "longitude": 13.653616,
+      "xPercent": 85.35925925925926,
+      "yPercent": 20.530041152263376,
+      "source": "manual",
+      "enabled": true,
+      "createdAt": "2026-07-24T06:44:30.581Z"
+    }
+  ]
+}

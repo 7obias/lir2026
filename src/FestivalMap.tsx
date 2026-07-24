@@ -500,6 +500,7 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
               calibration.reset()
               cancelCalibrationFlow()
             }}
+            onRestoreDefaults={calibration.restoreDefaults}
             onExport={calibration.exportJson}
             onImport={calibration.importJson}
             onToggleSimulation={() => {

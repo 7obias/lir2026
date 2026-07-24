@@ -24,6 +24,7 @@ type MapCalibrationPanelProps = {
   onDeletePoint: (id: string) => void
   onUndo: () => void
   onReset: () => void
+  onRestoreDefaults: () => Promise<void>
   onExport: () => string
   onImport: (json: string) => void
   onToggleSimulation: () => void
@@ -56,6 +57,7 @@ export function MapCalibrationPanel({
   onDeletePoint,
   onUndo,
   onReset,
+  onRestoreDefaults,
   onExport,
   onImport,
   onToggleSimulation,
@@ -211,6 +213,20 @@ export function MapCalibrationPanel({
           }}
         >
           Reset calibration
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            if (!window.confirm('Replace the current calibration with the bundled default calibration?')) return
+            try {
+              await onRestoreDefaults()
+              setImportError('')
+            } catch (error) {
+              setImportError(error instanceof Error ? error.message : 'Default calibration could not be restored')
+            }
+          }}
+        >
+          Restore default calibration
         </button>
       </div>
       {importError && <p className="calibration-error" role="alert">{importError}</p>}

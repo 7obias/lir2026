@@ -35,6 +35,7 @@ export default defineConfig(() => {
         'icons/icon-512.png',
         'icons/icon-maskable-512.png',
         'maps/lir26-map.jpg',
+        'maps/calibration.json',
       ],
       manifest: {
         id: '/lir2026/',
@@ -55,7 +56,7 @@ export default defineConfig(() => {
       },
       workbox: {
         navigateFallback: '/lir2026/index.html',
-        globPatterns: ['**/*.{js,css,html,png,jpg}'],
+        globPatterns: ['**/*.{js,css,html,png,jpg,json}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true
       }
