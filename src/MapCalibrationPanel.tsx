@@ -27,6 +27,7 @@ type MapCalibrationPanelProps = {
   onExport: () => string
   onImport: (json: string) => void
   onToggleSimulation: () => void
+  onDisableSimulation: () => void
   onClose: () => void
 }
 
@@ -58,6 +59,7 @@ export function MapCalibrationPanel({
   onExport,
   onImport,
   onToggleSimulation,
+  onDisableSimulation,
   onClose,
 }: MapCalibrationPanelProps) {
   const [replaceId, setReplaceId] = useState<string>()
@@ -193,8 +195,11 @@ export function MapCalibrationPanel({
       <div className="calibration-tools">
         <button type="button" disabled={!canUndo} onClick={onUndo}>Undo last adjustment</button>
         <button type="button" aria-pressed={simulationActive} onClick={onToggleSimulation}>
-          {simulationActive ? 'Stop GPS simulation' : 'Simulate GPS marker'}
+          {simulationActive ? 'Change simulated GPS' : 'Simulate GPS'}
         </button>
+        {simulationActive && (
+          <button type="button" onClick={onDisableSimulation}>Disable GPS simulation</button>
+        )}
         <button type="button" onClick={exportCalibration}>Export calibration</button>
         <button type="button" onClick={() => importRef.current?.click()}>Import calibration</button>
         <input ref={importRef} className="visually-hidden" type="file" accept="application/json,.json" onChange={importCalibration} />

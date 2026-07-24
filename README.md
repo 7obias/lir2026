@@ -76,6 +76,9 @@ Calibration is stored separately in local storage under
 field-verified points should later be committed to
 `src/data/festivalMapCalibration.ts`. Resetting all points requires confirmation.
 GPS simulation is a separate visual test mode and never creates calibration points.
+Its latitude and longitude dialog accepts the same Google Maps paste formats as
+calibration. The entered geographic coordinate is projected through the active
+calibration immediately; simulation never requires an image tap.
 
 ## Local setup
 
