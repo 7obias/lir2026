@@ -815,6 +815,20 @@ footer {
   font-variant-numeric: tabular-nums;
 }
 
+.map-calibration-confirmation dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin: 0;
+}
+
+.map-calibration-confirmation dl div { display: grid; gap: 1px }
+.map-calibration-confirmation dt { color: #9499a4; font-size: 7px }
+.map-calibration-confirmation dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
 .map-calibration-confirmation > div {
   display: flex;
   flex-wrap: wrap;

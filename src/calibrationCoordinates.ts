@@ -16,8 +16,13 @@ export const validLongitude = (value: string) => {
 
 export const parseCoordinatePair = (value: string) => {
   const match = value.trim().match(
-    /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*,\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/,
+    /^(\()?\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*,\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(\))?$/,
   )
-  if (!match || !validLatitude(match[1]) || !validLongitude(match[2])) return undefined
-  return { latitude: match[1], longitude: match[2] }
+  if (
+    !match
+    || Boolean(match[1]) !== Boolean(match[4])
+    || !validLatitude(match[2])
+    || !validLongitude(match[3])
+  ) return undefined
+  return { latitude: match[2], longitude: match[3] }
 }

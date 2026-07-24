@@ -206,14 +206,24 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
   const coordinatesValid = latitudeValid && longitudeValid
 
   const pasteCoordinates = (event: ClipboardEvent<HTMLInputElement>) => {
-    const pair = parseCoordinatePair(event.clipboardData.getData('text'))
-    if (!pair) return
+    const pasted = event.clipboardData.getData('text')
+    const pair = parseCoordinatePair(pasted)
+    if (!pair) {
+      if (pasted.includes(',') || pasted.includes('(') || pasted.includes(')')) {
+        event.preventDefault()
+        setCoordinateError(
+          'Invalid coordinate pair. Paste latitude first, then longitude, for example (50.522276, 13.646852).',
+        )
+      }
+      return
+    }
     event.preventDefault()
     setLatitudeInput(pair.latitude)
     setLongitudeInput(pair.longitude)
     setCoordinateSource('manual')
     setUseCurrentLocation(false)
     setCapturedAccuracy(undefined)
+    setCoordinateError('')
   }
 
   const acceptCoordinateInputs = () => {
@@ -290,7 +300,8 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
       ref={dialogRef}
       aria-labelledby="map-title"
       onClick={closeFromBackdrop}
-      onClose={() => {
+      onClose={(event) => {
+        if (event.target !== event.currentTarget) return
         cancelCalibrationFlow()
         setCalibrationOpen(false)
         onClose()
@@ -360,7 +371,8 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
           className="map-coordinate-dialog"
           ref={coordinateDialogRef}
           aria-labelledby="map-coordinate-title"
-          onClose={() => {
+          onClose={(event) => {
+            event.stopPropagation()
             coordinateRequestRef.current += 1
             setCoordinateLoading(false)
           }}
@@ -403,7 +415,10 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
                 aria-describedby={!latitudeValid && latitudeInput !== '' ? 'latitude-error' : undefined}
                 placeholder="50.522272"
                 onPaste={pasteCoordinates}
-                onChange={(event) => setLatitudeInput(event.target.value)}
+                onChange={(event) => {
+                  setLatitudeInput(event.target.value)
+                  setCoordinateError('')
+                }}
               />
             </label>
             {latitudeInput !== '' && !latitudeValid && (
@@ -422,7 +437,10 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
                 aria-describedby={!longitudeValid && longitudeInput !== '' ? 'longitude-error' : undefined}
                 placeholder="13.646872"
                 onPaste={pasteCoordinates}
-                onChange={(event) => setLongitudeInput(event.target.value)}
+                onChange={(event) => {
+                  setLongitudeInput(event.target.value)
+                  setCoordinateError('')
+                }}
               />
             </label>
             {longitudeInput !== '' && !longitudeValid && (
@@ -458,7 +476,7 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
         )}
         {simulationActive && <p className="map-simulation-badge">SIMULATED GPS · tap map to move</p>}
         {calibrationFlow === 'placing' && (
-          <p className="map-placement-banner" role="status">Tap the matching position on the festival map</p>
+          <p className="map-placement-banner" role="status">Tap the matching position on the festival map.</p>
         )}
         {calibrationFlow === 'confirming' && (
           <p className="map-placement-banner" role="status">Confirm the selected calibration point</p>
@@ -578,13 +596,15 @@ export function FestivalMap({ location, onClose }: FestivalMapProps) {
         </div>
         {calibrationFlow === 'confirming' && pendingReading && placementPreview && (
           <section className="map-calibration-confirmation" aria-label="Confirm map calibration point">
-            <strong>Confirm calibration point</strong>
-            <span>
-              {pendingReading.latitude.toFixed(6)}, {pendingReading.longitude.toFixed(6)}
-              {pendingReading.accuracyMeters !== undefined
-                ? ` · accuracy ±${pendingReading.accuracyMeters.toFixed(1)} m`
-                : ' · manual coordinates'}
-            </span>
+            <strong>Pending calibration</strong>
+            <dl>
+              <div><dt>Latitude</dt><dd>{pendingReading.latitude.toFixed(6)}</dd></div>
+              <div><dt>Longitude</dt><dd>{pendingReading.longitude.toFixed(6)}</dd></div>
+              {pendingReading.accuracyMeters !== undefined && (
+                <div><dt>Accuracy</dt><dd>±{pendingReading.accuracyMeters.toFixed(1)} m</dd></div>
+              )}
+            </dl>
+            <span>Tap Save to create this calibration point.</span>
             <div>
               <button type="button" onClick={cancelCalibrationFlow}>Cancel</button>
               <button
